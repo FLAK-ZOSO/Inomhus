@@ -30,7 +30,6 @@ enum Direction {UP, RIGHT, DOWN, LEFT};
 extern std::unordered_map<Direction, sista::Coordinates> directionMap;
 extern std::unordered_map<Direction, char> directionSymbol;
 extern std::mt19937 rng;
-extern bool day;
 
 
 struct Inventory {
@@ -143,6 +142,7 @@ public:
     Inventory inventory;
 
     Chest();
+    Chest(sista::Coordinates, Inventory, bool);
     Chest(sista::Coordinates, Inventory&);
 
     static void removeChest(Chest*);
@@ -267,5 +267,6 @@ public:
     static void removeGate(Gate*);
 };
 
-
+void input();
+void populate(sista::SwappableField*);
 void removeNullptrs(std::vector<Entity*>&);

@@ -3,6 +3,7 @@ In order to pick up items, you must be standing next to them and press the key t
 - with ijkl you can take up WALL which will go in the inventry (+wall.strength)
 
 - if you pick up an EGG with ijkl it will go in the inventry
+  - if you step on an egg you break it
   - if you throw the egg (with ijkl) it will be used as a bullet
   - if you hatch the egg (with ijkl when in {H}atch mode) it *may* turn into a chicken
 
