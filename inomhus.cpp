@@ -25,6 +25,13 @@ std::vector<Egg*> Egg::eggs;
 std::vector<Gate*> Gate::gates;
 std::vector<Wall*> Wall::walls;
 
+std::bernoulli_distribution Egg::hatchingDistribution(0.26); // 26%
+std::bernoulli_distribution Chicken::eggDistribution(0.05); // 5%
+std::bernoulli_distribution Chicken::movingDistribution(0.75); // 75%
+std::bernoulli_distribution Archer::movingDistribution(0.25); // 25%
+std::bernoulli_distribution Archer::shootDistribution(0.005); // 0.5%
+std::bernoulli_distribution Walker::movingDistribution(0.5); // 50%
+
 
 int main(int argc, char** argv) {
     #ifdef __APPLE__
@@ -177,11 +184,114 @@ void Player::shoot(Direction direction) {
     } else if (field->isOccupied(targetCoordinates)) {
         Entity* entity = (Entity*)field->getPawn(targetCoordinates);
         if (entity->type == Type::WALL) {
+            Wall* wall = (Wall*)entity;
+            if (mode == Mode::BULLET) {
+                wall->strength--;
+                if (wall->strength == 0) {
+                    wall->setSymbol('@'); // Change the symbol to '@' to indicate that the wall was destroyed
+                    field->rePrintPawn(wall); // It will be reprinted in the next frame and then removed because of (strength == 0)
+                }
+            } else if (mode == Mode::GATE) {
+                // Replace the wall with a gate
+                Wall::removeWall((Wall*)entity);
+                Gate::gates.push_back(new Gate(targetCoordinates));
+                field->addPrintPawn(Gate::gates.back());
+            } else if (mode == Mode::COLLECT) {
+                // Collect the wall
+                inventory.walls += wall->strength;
+                Wall::removeWall((Wall*)entity);
+            }
             return;
         } else if (entity->type == Type::CHEST) {
             inventory += ((Chest*)entity)->inventory;
             Chest::removeChest((Chest*)entity);
-        } // TODO
+        } else if (entity->type == Type::MINE) {
+            Mine* mine = (Mine*)entity;
+            mine->triggered = true;
+        } else if (entity->type == Type::TRAP) {
+            if (mode == Mode::BULLET) {
+                inventory.eggs--;
+                Trap::removeTrap((Trap*)entity);
+            }
+        } else if (entity->type == Type::WEASEL) {
+            if (mode == Mode::BULLET) {
+                inventory.eggs--;
+                inventory.meat++;
+                Weasel::removeWeasel((Weasel*)entity);
+            } else if (mode == Mode::COLLECT) {
+                inventory.meat++;
+                Weasel::removeWeasel((Weasel*)entity);
+            }
+        } else if (entity->type == Type::SNAKE) {
+            if (mode == Mode::BULLET) {
+                inventory.eggs--;
+                inventory.meat++;
+                Snake::removeSnake((Snake*)entity);
+            } else if (mode == Mode::COLLECT) {
+                inventory.meat++;
+                Snake::removeSnake((Snake*)entity);
+            }
+        } else if (entity->type == Type::GATE) {
+            if (mode == Mode::BULLET) {
+                Gate::removeGate((Gate*)entity);
+            }
+        } else if (entity->type == Type::CHICKEN) {
+            if (mode == Mode::BULLET) {
+                inventory.eggs--;
+                inventory.meat++;
+                Chicken::removeChicken((Chicken*)entity);
+            } else if (mode == Mode::COLLECT) {
+                inventory.meat++;
+                Chicken::removeChicken((Chicken*)entity);
+            }
+        } else if (entity->type == Type::EGG) {
+            if (mode == Mode::BULLET) {
+                inventory.eggs--;
+                Egg::removeEgg((Egg*)entity);
+            } else if (mode == Mode::COLLECT) {
+                inventory.eggs++;
+                Egg::removeEgg((Egg*)entity);
+            }
+        }
+    } else if (field->isFree(targetCoordinates)) {
+        if (mode == Mode::BULLET) {
+            inventory.eggs--;
+            Bullet::bullets.push_back(new Bullet(targetCoordinates, direction));
+            field->addPrintPawn(Bullet::bullets.back());
+        } else if (mode == Mode::DUMPCHEST) {
+            Chest::chests.push_back(new Chest(targetCoordinates, inventory));
+            field->addPrintPawn(Chest::chests.back());
+            inventory = {0, 0};
+        } else if (mode == Mode::WALL) {
+            if (inventory.walls > 0) {
+                Wall::walls.push_back(new Wall(targetCoordinates, 3));
+                field->addPrintPawn(Wall::walls.back());
+                inventory.walls--;
+            }
+        } else if (mode == Mode::GATE) {
+            inventory.walls -= 2;
+            inventory.eggs--;
+            Gate::gates.push_back(new Gate(targetCoordinates));
+            field->addPrintPawn(Gate::gates.back());
+        } else if (mode == Mode::TRAP) {
+            inventory.walls--;
+            inventory.eggs--;
+            Trap::traps.push_back(new Trap(targetCoordinates));
+            field->addPrintPawn(Trap::traps.back());
+        } else if (mode == Mode::MINE) {
+            inventory.walls--;
+            inventory.eggs -= 3;
+            Mine::mines.push_back(new Mine(targetCoordinates));
+            field->addPrintPawn(Mine::mines.back());
+        } else if (mode == Mode::HATCH) {
+            if (inventory.eggs > 0) {
+                if (Egg::hatchingDistribution(rng)) {
+                    Chicken::chickens.push_back(new Chicken(targetCoordinates));
+                    field->addPrintPawn(Chicken::chickens.back());
+                }
+                inventory.eggs--;
+            }
+        }
     }
 }
 
