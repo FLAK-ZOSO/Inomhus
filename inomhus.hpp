@@ -31,6 +31,7 @@ extern std::unordered_map<Direction, sista::Coordinates> directionMap;
 extern std::unordered_map<Direction, char> directionSymbol;
 extern std::mt19937 rng;
 
+extern ANSI::Settings nightPlayerStyle;
 
 struct Inventory {
     short walls = 0;

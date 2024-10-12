@@ -37,6 +37,25 @@ std::bernoulli_distribution snakeSpawnDistribution(0.01); // 1%
 // std::bernoulli_distribution chickenSpawnDistribution(0.05); // Chicken don't randomly spawn
 std::bernoulli_distribution wallSpawnDistribution(0.01); // 1%
 
+std::vector<char> gameControlKeys = {
+    '+', '-', '.', 'p', 'P', 'Q'
+};
+std::vector<char> gameKeys = {
+    'w', 'W', 'a', 'A', 's', 'S', 'd', 'D',
+    'j', 'J', 'k', 'K', 'l', 'L', 'i', 'I',
+    'c', 'C', 'b', 'B', 'e', 'E', 'q',
+    '=', '0', '#', 'g', 'G', 't', 'T', 'm', 'M', '*',
+    'h', 'H'
+};
+std::vector<char> acceptedKeys = {
+    'w', 'W', 'a', 'A', 's', 'S', 'd', 'D',
+    'j', 'J', 'k', 'K', 'l', 'L', 'i', 'I',
+    'c', 'C', 'b', 'B', 'e', 'E', 'q', 'Q',
+    '=', '0', '#', 'g', 'G', 't', 'T', 'm', 'M', '*',
+    'h', 'H',
+    '+', '-', '.', 'p', 'P', 'Q'
+};
+
 sista::SwappableField* field;
 sista::Cursor cursor;
 bool speedup = false;
@@ -87,12 +106,18 @@ int main(int argc, char** argv) {
             nightCountdown--;
         } else {
             dayCountdown--;
+            // Implement lycanthropy for the user, randomly picking a game key
+            char key = gameKeys[rand() % gameKeys.size()];
+            act(key);
         } // This could be golfed lol, but it's clearer this way
         if (dayCountdown <= 0 || nightCountdown <= 0) {
             day = !day;
             dayCountdown = NIGHT_DURATION;
             nightCountdown = DAY_DURATION;
             if (day) {
+                // The day is back, but the out-of-control player destroys the inventory
+                Player::player->inventory = (Inventory){0, 0, 0};
+                Player::player->setSettings(Player::playerStyle);
                 border = sista::Border(
                     '@', {
                         ANSI::ForegroundColor::F_BLACK,
@@ -101,6 +126,8 @@ int main(int argc, char** argv) {
                     }
                 );
             } else {
+                // The player is now out of control
+                Player::player->setSettings(nightPlayerStyle);
                 border = sista::Border(
                     '@', {
                         ANSI::ForegroundColor::F_WHITE,
@@ -637,6 +664,11 @@ ANSI::Settings Player::playerStyle = {
     ANSI::BackgroundColor::B_BLACK,
     ANSI::Attribute::BRIGHT
 };
+ANSI::Settings nightPlayerStyle = {
+    ANSI::ForegroundColor::F_BLUE,
+    ANSI::BackgroundColor::B_BLACK,
+    ANSI::Attribute::REVERSE
+};
 Player::Player(sista::Coordinates coordinates) : Entity('$', coordinates, playerStyle, Type::PLAYER), mode(Player::Mode::COLLECT), inventory({0, 0}) {}
 Player::Player() : Entity('$', {0, 0}, playerStyle, Type::PLAYER), mode(Player::Mode::COLLECT), inventory({0, 0}) {}
 void Player::move(Direction direction) {
@@ -790,9 +822,11 @@ void Player::shoot(Direction direction) {
             Bullet::bullets.push_back(new Bullet(targetCoordinates, direction));
             field->addPrintPawn(Bullet::bullets.back());
         } else if (mode == Mode::DUMPCHEST) {
-            Chest::chests.push_back(new Chest(targetCoordinates, inventory));
-            field->addPrintPawn(Chest::chests.back());
-            inventory = {0, 0, 0};
+            if (inventory.walls > 0 || inventory.eggs > 0 || inventory.meat > 0) {
+                Chest::chests.push_back(new Chest(targetCoordinates, inventory));
+                field->addPrintPawn(Chest::chests.back());
+                inventory = {0, 0, 0};
+            }
         } else if (mode == Mode::WALL) {
             if (inventory.walls > 0) {
                 Wall::walls.push_back(new Wall(targetCoordinates, 3));
