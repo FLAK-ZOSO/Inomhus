@@ -5,7 +5,7 @@
 
 Your character is represented by the `$` symbol and is happy to live in a 2D grid world; there are chickens (`%`) laying eggs (`0`) that the you can eat, chests (`C`) that may contain bricks and food, and comfortable walls (`#`) that can be used to build a house.
 
-However the world is not as friendly as it may seem at daylight, there are snakes (`~`) that eat the precious eggs, weasels (`}`) that hunt the chickens, threatening blind zombies (`Z`) that will follow you around and archers (`A`) that will shoot you from a distance.
+However the world is not as friendly as it may seem at daylight, there are snakes (`~`) that eat the precious eggs, weasels (`}`) that hunt the chickens, threatening blind zombies (`Z`) that will follow you around and that you should better not bump, archers (`A`) that will shoot you from a distance.
 
 But, as it often happens in life, the worst enemy is yourself: when the night comes the character goes **out of control** and as a player you cannot control your character anymore, you can only watch it move around, destroy its own inventory and put itself in real danger.
 

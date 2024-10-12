@@ -67,6 +67,7 @@ bool day = true;
 int main(int argc, char** argv) {
     #ifdef __APPLE__
         term_echooff();
+        system("stty raw -echo");
     #endif
     std::ios_base::sync_with_stdio(false);
     ANSI::reset(); // Reset the settings
@@ -352,7 +353,11 @@ int main(int argc, char** argv) {
                 std::cout << "Hatch";
                 break;
         }
-        std::cout << "   ";
+        std::cout << "      ";
+        cursor.set(18, 80);
+        ANSI::setAttribute(ANSI::Attribute::BRIGHT);
+        std::cout << "Time survived: " << i << "    \n";
+        ANSI::resetAttribute(ANSI::Attribute::BRIGHT);
         cursor.set(20, 80);
         ANSI::setAttribute(ANSI::Attribute::BRIGHT);
         std::cout << "Time before ";
@@ -375,6 +380,7 @@ int main(int argc, char** argv) {
         getch();
     #endif
     #ifdef __APPLE__
+        system("stty -raw echo");
         tcsetattr(0, TCSANOW, &orig_termios);
     #endif
 }
