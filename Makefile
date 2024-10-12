@@ -1,5 +1,5 @@
 # Makefile for Inomhus
-IMPLEMENTATIONS=Sista/include/sista/ANSI-Settings.cpp Sista/include/sista/border.cpp Sista/include/sista/coordinates.cpp Sista/include/sista/cursor.cpp Sista/include/sista/field.cpp Sista/include/sista/pawn.cpp
+IMPLEMENTATIONS = include/sista/ANSI-Settings.cpp include/sista/border.cpp include/sista/coordinates.cpp include/sista/cursor.cpp include/sista/field.cpp include/sista/pawn.cpp
 
 all:
 	g++ -std=c++17 -Wall -g -c $(IMPLEMENTATIONS)
