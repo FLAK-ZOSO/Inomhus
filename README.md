@@ -88,4 +88,5 @@ Game controls.
 - FLAK-ZOSO for the Sista library
 - Stefano Tocazzo for the trailer
 - NIVIRO for the [trailer's soundtrack](https://ncs.io/TheRiot)
+- [BeautifulSara3137](https://github.com/BeautifulSara3137) for the MacOS testing and executables
 - ITÜK for the [event](https://gamecamp.ituk.ee/event/08dcca81-1c54-47d0-8eda-151aa7b1e956)

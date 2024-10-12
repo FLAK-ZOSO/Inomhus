@@ -71,6 +71,7 @@ sista::Border border(
         ANSI::Attribute::BRIGHT
     }
 );
+bool streamSemaphore = false;
 bool speedup = false;
 bool pause_ = false;
 bool end = false;
@@ -175,13 +176,11 @@ int main(int argc, char** argv) {
                 }
             }
         }
-        /*
-        PLAYER, BULLET, WALL,
-        GATE, CHEST, TRAP,
-        MINE, WALKER, ARCHER,
-        ENEMYBULLET, WEASEL,
-        SNAKE, CHICKEN, EGG
-        */
+        streamSemaphore = false;
+        do {
+            std::this_thread::sleep_for(std::chrono::microseconds(1));
+        } while (streamSemaphore);
+        streamSemaphore = true;
         for (unsigned j=0; j<Bullet::bullets.size(); j++) {
             if (j >= Bullet::bullets.size()) break;
             Bullet* bullet = Bullet::bullets[j];
@@ -309,6 +308,11 @@ int main(int argc, char** argv) {
             // repopulate the field from scratch for preventing nullptr pawns from laying around
             repopulate(field);
         }
+        streamSemaphore = false;
+        do {
+            std::this_thread::sleep_for(std::chrono::microseconds(1));
+        } while (streamSemaphore);
+        streamSemaphore = true;
         #if __linux__
         if (i % 10 == 9) {
         #elif __APPLE__ or _WIN32
@@ -377,6 +381,7 @@ int main(int argc, char** argv) {
         }
         ANSI::resetAttribute(ANSI::Attribute::BRIGHT);
         std::flush(std::cout);
+        streamSemaphore = false;
     }
 
     th.join();
@@ -426,6 +431,11 @@ void input() {
 }
 
 void act(char input) {
+    streamSemaphore = false;
+    do {
+        std::this_thread::sleep_for(std::chrono::microseconds(1));
+    } while (streamSemaphore);
+    streamSemaphore = true;
     switch (input) {
         case 'w': case 'W':
             Player::player->move(Direction::UP);
@@ -490,6 +500,7 @@ void act(char input) {
         default:
             break;
     }
+    streamSemaphore = false;
 }
 
 void printIntro() {
