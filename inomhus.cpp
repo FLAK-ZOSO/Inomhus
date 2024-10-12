@@ -1348,7 +1348,7 @@ void Snake::move() {
 ANSI::Settings Chicken::chickenStyle = {
     ANSI::ForegroundColor::F_YELLOW,
     ANSI::BackgroundColor::B_BLACK,
-    ANSI::Attribute::BRIGHT
+    ANSI::Attribute::ITALIC
 };
 void Chicken::removeChicken(Chicken* chicken) {
     Chicken::chickens.erase(std::find(Chicken::chickens.begin(), Chicken::chickens.end(), chicken));
