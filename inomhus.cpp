@@ -4,6 +4,7 @@
 #include <fstream>
 #include <thread>
 #include <chrono>
+#include <mutex>
 
 #define DAY_DURATION 500
 #define NIGHT_DURATION 200
@@ -30,14 +31,15 @@ std::vector<Gate*> Gate::gates;
 std::vector<Wall*> Wall::walls;
 
 std::bernoulli_distribution Egg::hatchingDistribution(0.26); // 26%
-std::bernoulli_distribution Chicken::eggDistribution(0.005); // 0.5%
+std::bernoulli_distribution eggSelfHatchingDistribution(0.001); // 0.1%
+std::bernoulli_distribution Chicken::eggDistribution(0.0075); // 0.75%
 std::bernoulli_distribution Chicken::movingDistribution(0.75); // 75%
 std::bernoulli_distribution Archer::movingDistribution(0.25); // 25%
 std::bernoulli_distribution Archer::shootDistribution(0.005); // 0.5%
 std::bernoulli_distribution Walker::movingDistribution(0.30); // 30%
 
-std::bernoulli_distribution walkerSpawnDistribution(0.004); // 0.4%
-std::bernoulli_distribution archerSpawnDistribution(0.007); // 0.7%
+std::bernoulli_distribution walkerSpawnDistribution(0.003); // 0.3%
+std::bernoulli_distribution archerSpawnDistribution(0.004); // 0.4%
 std::bernoulli_distribution weaselSpawnDistribution(0.01); // 1%
 std::bernoulli_distribution snakeSpawnDistribution(0.01); // 1%
 // std::bernoulli_distribution chickenSpawnDistribution(0.05); // Chicken don't randomly spawn
@@ -71,7 +73,7 @@ sista::Border border(
         ANSI::Attribute::BRIGHT
     }
 );
-bool streamSemaphore = false;
+std::mutex streamMutex;
 bool speedup = false;
 bool pause_ = false;
 bool end = false;
@@ -176,11 +178,10 @@ int main(int argc, char** argv) {
                 }
             }
         }
-        streamSemaphore = false;
-        do {
-            std::this_thread::sleep_for(std::chrono::microseconds(1));
-        } while (streamSemaphore);
-        streamSemaphore = true;
+        for (auto coord : coordinates) {
+            field->erasePawn(coord);
+        }
+        std::lock_guard<std::mutex> lock(streamMutex);
         for (unsigned j=0; j<Bullet::bullets.size(); j++) {
             if (j >= Bullet::bullets.size()) break;
             Bullet* bullet = Bullet::bullets[j];
@@ -242,6 +243,21 @@ int main(int argc, char** argv) {
             if (chicken == nullptr) continue;
             if (Chicken::movingDistribution(rng)) {
                 chicken->move();
+            }
+        }
+        // Eggs self-hatching
+        for (unsigned e=0; e<Egg::eggs.size(); e++) {
+            if (e >= Egg::eggs.size()) break;
+            Egg* egg = Egg::eggs[e];
+            if (egg == nullptr) continue;
+            if (eggSelfHatchingDistribution(rng)) {
+                if (Egg::hatchingDistribution(rng) || Egg::hatchingDistribution(rng)) { // more probable to hatch successfully in the wild
+                    Egg::removeEgg(egg);
+                    Chicken::chickens.push_back(new Chicken(egg->getCoordinates()));
+                    field->addPrintPawn(Chicken::chickens.back());
+                } else {
+                    Egg::removeEgg(egg);
+                }
             }
         }
         for (unsigned w=0; w<Walker::walkers.size(); w++) {
@@ -308,11 +324,6 @@ int main(int argc, char** argv) {
             // repopulate the field from scratch for preventing nullptr pawns from laying around
             repopulate(field);
         }
-        streamSemaphore = false;
-        do {
-            std::this_thread::sleep_for(std::chrono::microseconds(1));
-        } while (streamSemaphore);
-        streamSemaphore = true;
         #if __linux__
         if (i % 10 == 9) {
         #elif __APPLE__ or _WIN32
@@ -381,7 +392,6 @@ int main(int argc, char** argv) {
         }
         ANSI::resetAttribute(ANSI::Attribute::BRIGHT);
         std::flush(std::cout);
-        streamSemaphore = false;
     }
 
     th.join();
@@ -431,37 +441,48 @@ void input() {
 }
 
 void act(char input) {
-    streamSemaphore = false;
-    do {
-        std::this_thread::sleep_for(std::chrono::microseconds(1));
-    } while (streamSemaphore);
-    streamSemaphore = true;
     switch (input) {
-        case 'w': case 'W':
+        case 'w': case 'W': {
+            std::lock_guard<std::mutex> lock(streamMutex);
             Player::player->move(Direction::UP);
             break;
-        case 'd': case 'D':
-            Player::player->move(Direction::RIGHT);
-            break;
-        case 's': case 'S':
-            Player::player->move(Direction::DOWN);
-            break;
-        case 'a': case 'A':
+        }
+        case 'a': case 'A': {
+            std::lock_guard<std::mutex> lock(streamMutex);
             Player::player->move(Direction::LEFT);
             break;
+        }
+        case 's': case 'S': {
+            std::lock_guard<std::mutex> lock(streamMutex);
+            Player::player->move(Direction::DOWN);
+            break;
+        }
+        case 'd': case 'D': {
+            std::lock_guard<std::mutex> lock(streamMutex);
+            Player::player->move(Direction::RIGHT);
+            break;
+        }
 
-        case 'j': case 'J':
+        case 'j': case 'J': {
+            std::lock_guard<std::mutex> lock(streamMutex);
             Player::player->shoot(Direction::LEFT);
             break;
-        case 'k': case 'K':
+        }
+        case 'k': case 'K': {
+            std::lock_guard<std::mutex> lock(streamMutex);
             Player::player->shoot(Direction::DOWN);
             break;
-        case 'l': case 'L':
+        }
+        case 'l': case 'L': {
+            std::lock_guard<std::mutex> lock(streamMutex);
             Player::player->shoot(Direction::RIGHT);
             break;
-        case 'i': case 'I':
+        }
+        case 'i': case 'I': {
+            std::lock_guard<std::mutex> lock(streamMutex);
             Player::player->shoot(Direction::UP);
             break;
+        }
 
         case 'c': case 'C':
             Player::player->mode = Player::Mode::COLLECT;
@@ -500,7 +521,6 @@ void act(char input) {
         default:
             break;
     }
-    streamSemaphore = false;
 }
 
 void printIntro() {
