@@ -8,6 +8,12 @@
 #define DAY_DURATION 500
 #define NIGHT_DURATION 200
 
+#define WIDTH 70
+#define HEIGHT 30
+
+#define VERSION "BETA"
+#define DATE "2024-10-12"
+
 Player* Player::player;
 std::vector<Walker*> Walker::walkers;
 std::vector<Archer*> Archer::archers;
@@ -58,6 +64,13 @@ std::vector<char> acceptedKeys = {
 
 sista::SwappableField* field;
 sista::Cursor cursor;
+sista::Border border(
+    '@', {
+        ANSI::ForegroundColor::F_BLACK,
+        ANSI::BackgroundColor::B_WHITE,
+        ANSI::Attribute::BRIGHT
+    }
+);
 bool speedup = false;
 bool pause_ = false;
 bool end = false;
@@ -73,16 +86,11 @@ int main(int argc, char** argv) {
     ANSI::reset(); // Reset the settings
     srand(time(0)); // Seed the random number generator
 
-    sista::SwappableField field_(70, 30);
+
+    sista::SwappableField field_(WIDTH, HEIGHT);
     field = &field_;
     field->clear();
-    sista::Border border(
-        '@', {
-            ANSI::ForegroundColor::F_BLACK,
-            ANSI::BackgroundColor::B_WHITE,
-            ANSI::Attribute::BRIGHT
-        }
-    );
+    printIntro();
     field->addPrintPawn(Player::player = new Player({0, 0}));
     populate(field);
     sista::clearScreen();
@@ -141,8 +149,8 @@ int main(int argc, char** argv) {
             field->print(border);
         }
         std::vector<sista::Coordinates> coordinates;
-        for (unsigned short j=0; j<30; j++) {
-            for (unsigned short i=0; i<70; i++) {
+        for (unsigned short j=0; j<HEIGHT; j++) {
+            for (unsigned short i=0; i<WIDTH; i++) {
                 Entity* pawn = (Entity*)field->getPawn(j, i);
                 if (pawn == nullptr) continue;
                 if (std::find(Bullet::bullets.begin(), Bullet::bullets.end(), pawn) == Bullet::bullets.end() &&
@@ -305,10 +313,10 @@ int main(int argc, char** argv) {
         #elif __APPLE__ or _WIN32
         if (i % 100 == 99) {
         #endif
-            sista::clearScreen();
             // reprint the field every 10 frames
             sista::clearScreen();
             field->print(border);
+            printSideInstructions();
         }
         // Spawn new entities
         spawnNew(field);
@@ -483,13 +491,60 @@ void act(char input) {
     }
 }
 
+void printIntro() {
+    std::cout << CLS; // Clear screen
+    std::cout << SSB; // Clear scrollback buffer
+    field->print(border);
+    cursor.set(5, 0);
+    // if linux
+    #if __linux__ or __APPLE__
+        std::cout << "\x1b]2;Bättre att stanna Inomhus\x07"; // Set window title
+        std::cout << "\t\t\t  \x1b[3mInomhus\x1b[0m\n\t\t\x1b[3mYou better be at home by night\x1b[0m\n\n";
+        std::cout << "\t  \x1b[31;1mInomhus v" << VERSION << "\t\tFLAK-ZOSO " << DATE << "\x1b[0m\n\n";
+    #elif defined(_WIN32)
+        std::cout << "\x1b]2;de dodas angrepp\x07"; // Set window title
+        std::cout << "\t\t\t  \x1b[3mInomhus\x1b[0m\n\t\t\x1b[3mYou better be at home by night\x1b[0m\n\n";
+        std::cout << "\t  \x1b[31;1mInomhus v" << VERSION << "\t\tFLAK-ZOSO " << DATE << "\x1b[0m\n\n";
+    #endif
+
+    std::cout << "\t  https://github.com/FLAK-ZOSO/Inomhus\n\n";
+    std::cout << "\t- '\x1b[35m.\x1b[0m' or '\x1b[35mp\x1b[0m' or '\x1b[35mP\x1b[0m' to pause or resume\n";
+    std::cout << "\t- '\x1b[35mw\x1b[0m | \x1b[35ma\x1b[0m | \x1b[35ms\x1b[0m | \x1b[35md\x1b[0m' to step\n";
+    std::cout << "\t- '\x1b[35mi\x1b[0m | \x1b[35mj\x1b[0m | \x1b[35mk\x1b[0m | \x1b[35ml\x1b[0m' to shoot, deposit, collect\n";
+    std::cout << "\t- '\x1b[35mb\x1b[0m' to select bullets (well, to throw eggs)\n";
+    std::cout << "\t- '\x1b[35mm\x1b[0m' to select mines\n";
+    std::cout << "\t- '\x1b[35m+\x1b[0m' or '\x1b[35m-\x1b[0m' to enter or exit speedup mode\n";
+    std::cout << "\t- '\x1b[35m=\x1b[0m' or '\x1b[35m0\x1b[0m' or '\x1b[35m#\x1b[0m' to select walls\n";
+    std::cout << "\t- '\x1b[35mg\x1b[0m' or '\x1b[35mG\x1b[0m' to select gates\n";
+    std::cout << "\t- '\x1b[35mt\x1b[0m' or '\x1b[35mT\x1b[0m' to select traps\n";
+    std::cout << "\t- '\x1b[35mh\x1b[0m' or '\x1b[35mH\x1b[0m' to enter egg-hatching mode\n";
+    std::cout << "\t- '\x1b[35mQ\x1b[0m' to quit\n\n";
+
+    std::cout << "\tMake sure to have the terminal full-screen\n\n";
+
+    ANSI::setAttribute(ANSI::Attribute::BLINK);
+    std::cout << "\t\t\x1b[3mPress any key to start\x1b[0m";
+    std::flush(std::cout);
+    #if defined(_WIN32) or defined(__linux__)
+        getch();
+    #elif __APPLE__
+        getchar();
+    #endif
+    sista::clearScreen();
+}
+
+void printSideInstructions() {
+    // Be aware not to overwrite the inventory and the time survived which use {10, 80} to ~{18, 80}
+    cursor.set(20, 80);
+}
+
 void populate(sista::SwappableField* field) {
     // Walls, some randomly around the field and some in a row
     sista::Coordinates coordinates;
     for (int j=0; j<5; j++) {
-        int length = rand() % 20 + 1;
-        int start_column = rand() % (70 - length);
-        int row = rand() % 20;
+        int length = rand() % (HEIGHT - 10) + 1;
+        int start_column = rand() % (WIDTH - length);
+        int row = rand() % (HEIGHT - 10);
         for (int i=0; i<length; i++) {
             coordinates = {row, start_column + i};
             if (field->isFree(coordinates)) {
@@ -498,8 +553,8 @@ void populate(sista::SwappableField* field) {
             }
         }
     }
-    for (int i=0; i<30; i++) {
-        coordinates = {rand() % 30, rand() % 70};
+    for (int i=0; i<HEIGHT; i++) {
+        coordinates = {rand() % HEIGHT, rand() % WIDTH};
         if (field->isFree(coordinates)) {
             Wall::walls.push_back(new Wall(coordinates, rand() % 2 + 1));
             field->addPrintPawn(Wall::walls.back());
@@ -507,7 +562,7 @@ void populate(sista::SwappableField* field) {
     }
     // Chests, a couple of them
     for (int i=0; i<3; i++) {
-        coordinates = {rand() % 30, rand() % 70};
+        coordinates = {rand() % HEIGHT, rand() % WIDTH};
         if (field->isFree(coordinates)) {
             Chest::chests.push_back(new Chest(coordinates, (Inventory){rand() % 5, rand() % 5}, true));
             field->addPrintPawn(Chest::chests.back());
@@ -515,7 +570,7 @@ void populate(sista::SwappableField* field) {
     }
     // Walkers, some randomly around the field, but none of them in a 5x5 square around the player, which starts in {0, 0}
     for (int i=0; i<5; i++) {
-        coordinates = {rand() % 30, rand() % 70};
+        coordinates = {rand() % HEIGHT, rand() % WIDTH};
         if (field->isFree(coordinates) && coordinates.y > 5 && coordinates.x > 5) {
             Walker::walkers.push_back(new Walker(coordinates));
             field->addPrintPawn(Walker::walkers.back());
@@ -523,27 +578,27 @@ void populate(sista::SwappableField* field) {
     }
     // Archers, some randomly around the field, but none in the same row or column as the player
     for (int i=0; i<5; i++) {
-        coordinates = {rand() % 25 + 5, rand() % 65 + 5};
+        coordinates = {rand() % (HEIGHT - 5) + 5, rand() % (WIDTH - 5) + 5};
         if (field->isFree(coordinates)) {
             Archer::archers.push_back(new Archer(coordinates));
             field->addPrintPawn(Archer::archers.back());
         }
     }
     // Only one Weasel, to be generated from the left side of the field
-    coordinates = {rand() % 30, 0};
+    coordinates = {rand() % HEIGHT, 0};
     if (field->isFree(coordinates)) {
         Weasel::weasels.push_back(new Weasel(coordinates, Direction::RIGHT));
         field->addPrintPawn(Weasel::weasels.back());
     }
     // Only one Snake, to be generated from the right side of the field
-    coordinates = {rand() % 20, 69};
+    coordinates = {rand() % (HEIGHT - 10), WIDTH - 1};
     if (field->isFree(coordinates)) {
         Snake::snakes.push_back(new Snake(coordinates, Direction::LEFT));
         field->addPrintPawn(Snake::snakes.back());
     }
     // Some Chickens, randomly around the field
     for (int i=0; i<5; i++) {
-        coordinates = {rand() % 30, rand() % 70};
+        coordinates = {rand() % HEIGHT, rand() % WIDTH};
         if (field->isFree(coordinates)) {
             Chicken::chickens.push_back(new Chicken(coordinates));
             field->addPrintPawn(Chicken::chickens.back());
@@ -551,7 +606,7 @@ void populate(sista::SwappableField* field) {
     }
     // Some Eggs, randomly around the field
     for (int i=0; i<15; i++) {
-        coordinates = {rand() % 30, rand() % 70};
+        coordinates = {rand() % HEIGHT, rand() % WIDTH};
         if (field->isFree(coordinates)) {
             Egg::eggs.push_back(new Egg(coordinates));
             field->addPrintPawn(Egg::eggs.back());
@@ -605,35 +660,35 @@ void repopulate(sista::SwappableField* field) {
 
 void spawnNew(sista::SwappableField* field) {
     if (walkerSpawnDistribution(rng)) {
-        sista::Coordinates coordinates = {rand() % 30, rand() % 70};
+        sista::Coordinates coordinates = {rand() % HEIGHT, rand() % WIDTH};
         if (field->isFree(coordinates)) {
             Walker::walkers.push_back(new Walker(coordinates));
             field->addPrintPawn(Walker::walkers.back());
         }
     }
     if (archerSpawnDistribution(rng)) {
-        sista::Coordinates coordinates = {rand() % 30, rand() % 70};
+        sista::Coordinates coordinates = {rand() % HEIGHT, rand() % WIDTH};
         if (field->isFree(coordinates)) {
             Archer::archers.push_back(new Archer(coordinates));
             field->addPrintPawn(Archer::archers.back());
         }
     }
     if (weaselSpawnDistribution(rng)) {
-        sista::Coordinates coordinates = {rand() % 30, 0};
+        sista::Coordinates coordinates = {rand() % HEIGHT, 0};
         if (field->isFree(coordinates)) {
             Weasel::weasels.push_back(new Weasel(coordinates, Direction::RIGHT));
             field->addPrintPawn(Weasel::weasels.back());
         }
     }
     if (snakeSpawnDistribution(rng)) {
-        sista::Coordinates coordinates = {rand() % 20, 69};
+        sista::Coordinates coordinates = {rand() % (HEIGHT - 10), WIDTH - 1};
         if (field->isFree(coordinates)) {
             Snake::snakes.push_back(new Snake(coordinates, Direction::LEFT));
             field->addPrintPawn(Snake::snakes.back());
         }
     }
     if (wallSpawnDistribution(rng)) {
-        sista::Coordinates coordinates = {rand() % 30, rand() % 70};
+        sista::Coordinates coordinates = {rand() % HEIGHT, rand() % WIDTH};
         if (field->isFree(coordinates)) {
             Wall::walls.push_back(new Wall(coordinates, 3));
             field->addPrintPawn(Wall::walls.back());
