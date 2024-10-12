@@ -26,7 +26,14 @@ std::bernoulli_distribution Chicken::eggDistribution(0.005); // 0.5%
 std::bernoulli_distribution Chicken::movingDistribution(0.75); // 75%
 std::bernoulli_distribution Archer::movingDistribution(0.25); // 25%
 std::bernoulli_distribution Archer::shootDistribution(0.005); // 0.5%
-std::bernoulli_distribution Walker::movingDistribution(0.5); // 50%
+std::bernoulli_distribution Walker::movingDistribution(0.30); // 30%
+
+std::bernoulli_distribution walkerSpawnDistribution(0.004); // 0.4%
+std::bernoulli_distribution archerSpawnDistribution(0.007); // 0.7%
+std::bernoulli_distribution weaselSpawnDistribution(0.01); // 1%
+std::bernoulli_distribution snakeSpawnDistribution(0.005); // 0.5%
+// std::bernoulli_distribution chickenSpawnDistribution(0.05); // Chicken don't randomly spawn
+std::bernoulli_distribution wallSpawnDistribution(0.01); // 1%
 
 sista::SwappableField* field;
 sista::Cursor cursor;
@@ -128,15 +135,6 @@ int main(int argc, char** argv) {
         ENEMYBULLET, WEASEL,
         SNAKE, CHICKEN, EGG
         */
-        // for (auto walker : Walker::walkers) {
-        //     walker->move();
-        // }
-        // for (auto archer : Archer::archers) {
-        //     archer->move();
-        //     if (Archer::shootDistribution(rng)) {
-        //         archer->shoot();
-        //     }
-        // }
         for (unsigned j=0; j<Bullet::bullets.size(); j++) {
             if (j >= Bullet::bullets.size()) break;
             Bullet* bullet = Bullet::bullets[j];
@@ -199,12 +197,132 @@ int main(int argc, char** argv) {
                 chicken->move();
             }
         }
+        for (int w=0; w<Walker::walkers.size(); w++) {
+            if (w >= Walker::walkers.size()) break;
+            Walker* walker = Walker::walkers[w];
+            if (walker == nullptr) continue;
+            if (Walker::movingDistribution(rng)) {
+                walker->move();
+            }
+        }
+        for (int a=0; a<Archer::archers.size(); a++) {
+            if (a >= Archer::archers.size()) break;
+            Archer* archer = Archer::archers[a];
+            if (archer == nullptr) continue;
+            if (Archer::movingDistribution(rng)) {
+                archer->move();
+            }
+            if (Archer::shootDistribution(rng)) {
+                archer->shoot();
+            }
+        }
+        for (int w=0; w<Weasel::weasels.size(); w++) {
+            if (w >= Weasel::weasels.size()) break;
+            Weasel* weasel = Weasel::weasels[w];
+            if (weasel == nullptr) continue;
+            weasel->move();
+        }
+        for (int s=0; s<Snake::snakes.size(); s++) {
+            if (s >= Snake::snakes.size()) break;
+            Snake* snake = Snake::snakes[s];
+            if (snake == nullptr) continue;
+            snake->move();
+        }
+        for (int w=0; w<Wall::walls.size(); w++) {
+            if (w >= Wall::walls.size()) break;
+            Wall* wall = Wall::walls[w];
+            if (wall == nullptr) continue;
+            if (wall->strength == 0) {
+                Wall::removeWall(wall);
+            }
+        }
+        // Iterate over wild animals to see if they have reached the other side of the field or they have been caught
+        for (int w=0; w<Weasel::weasels.size(); w++) {
+            if (w >= Weasel::weasels.size()) break;
+            Weasel* weasel = Weasel::weasels[w];
+            if (weasel == nullptr) continue;
+            if (weasel->crossed) {
+                Weasel::removeWeasel(weasel);
+            } else if (weasel->caught) {
+                Weasel::removeWeasel(weasel);
+                Player::player->inventory.meat++;
+            }
+        }
+        for (int s=0; s<Snake::snakes.size(); s++) {
+            if (s >= Snake::snakes.size()) break;
+            Snake* snake = Snake::snakes[s];
+            if (snake == nullptr) continue;
+            if (snake->crossed) {
+                Snake::removeSnake(snake);
+            }
+        }
+
+        if (i % 128 == 127) {
+            // repopulate the field from scratch for preventing nullptr pawns from laying around
+            repopulate(field);
+        }
+        if (i % 10 == 9) {
+            // reprint the field every 10 frames
+            sista::clearScreen();
+            field->print(border);
+        }
+        // Spawn new entities
+        spawnNew(field);
+
+        // Print the inventory
+        ANSI::reset();
+        cursor.set(10, 80);
+        std::cout << "Inventory\n";
+        cursor.set(11, 80);
+        std::cout << "Walls: " << Player::player->inventory.walls << "   \n";
+        cursor.set(12, 80);
+        std::cout << "Eggs: " << Player::player->inventory.eggs << "   \n";
+        cursor.set(13, 80);
+        std::cout << "Meat: " << Player::player->inventory.meat << "   \n";
+        cursor.set(14, 80);
+        std::cout << "Mode: ";
+        switch (Player::player->mode) {
+            case Player::Mode::COLLECT:
+                std::cout << "Collect";
+                break;
+            case Player::Mode::BULLET:
+                std::cout << "Bullet";
+                break;
+            case Player::Mode::DUMPCHEST:
+                std::cout << "Dump chest";
+                break;
+            case Player::Mode::WALL:
+                std::cout << "Wall";
+                break;
+            case Player::Mode::GATE:
+                std::cout << "Gate";
+                break;
+            case Player::Mode::TRAP:
+                std::cout << "Trap";
+                break;
+            case Player::Mode::MINE:
+                std::cout << "Mine";
+                break;
+            case Player::Mode::HATCH:
+                std::cout << "Hatch";
+                break;
+        }
+        std::cout << "   ";
         std::flush(std::cout);
     }
 
     th.join();
-    cursor.set(52, 0); // Move the cursor to the bottom of the screen, so the terminal is not left in a weird state
-    std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+    cursor.set(72, 0); // Move the cursor to the bottom of the screen, so the terminal is not left in a weird state
+    #if __linux__
+        getch();
+    #elif __APPLE__
+        getchar();
+    #elif _WIN32
+        getch();
+    #endif
+    #ifdef __APPLE__
+        tcsetattr(0, TCSANOW, &orig_termios);
+    #endif
 }
 
 void input() {
@@ -285,24 +403,9 @@ void input() {
 }
 
 void populate(sista::SwappableField* field) {
-    /*
-        PLAYER, BULLET, WALL,
-        GATE, CHEST, TRAP,
-        MINE, WALKER, ARCHER,
-        ENEMYBULLET, WEASEL,
-        SNAKE, CHICKEN, EGG
-    */
-
     // Walls, some randomly around the field and some in a row
     sista::Coordinates coordinates;
-    for (int i=0; i<10; i++) {
-        coordinates = {rand() % 30, rand() % 70};
-        if (field->isFree(coordinates)) {
-            Wall::walls.push_back(new Wall(coordinates, rand() % 2 + 1));
-            field->addPrintPawn(Wall::walls.back());
-        }
-    }
-    for (int j=0; j<3; j++) {
+    for (int j=0; j<5; j++) {
         int length = rand() % 20 + 1;
         int start_column = rand() % (70 - length);
         int row = rand() % 20;
@@ -312,6 +415,13 @@ void populate(sista::SwappableField* field) {
                 Wall::walls.push_back(new Wall(coordinates, rand() % 2 + 1));
                 field->addPrintPawn(Wall::walls.back());
             }
+        }
+    }
+    for (int i=0; i<30; i++) {
+        coordinates = {rand() % 30, rand() % 70};
+        if (field->isFree(coordinates)) {
+            Wall::walls.push_back(new Wall(coordinates, rand() % 2 + 1));
+            field->addPrintPawn(Wall::walls.back());
         }
     }
     // Chests, a couple of them
@@ -364,6 +474,88 @@ void populate(sista::SwappableField* field) {
         if (field->isFree(coordinates)) {
             Egg::eggs.push_back(new Egg(coordinates));
             field->addPrintPawn(Egg::eggs.back());
+        }
+    }
+}
+
+void repopulate(sista::SwappableField* field) {
+    field->clear();
+    field->addPrintPawn(Player::player);
+    for (auto wall : Wall::walls) {
+        field->addPrintPawn(wall);
+    }
+    for (auto chest : Chest::chests) {
+        field->addPrintPawn(chest);
+    }
+    for (auto mine : Mine::mines) {
+        field->addPrintPawn(mine);
+    }
+    for (auto trap : Trap::traps) {
+        field->addPrintPawn(trap);
+    }
+    for (auto gate : Gate::gates) {
+        field->addPrintPawn(gate);
+    }
+    for (auto weasel : Weasel::weasels) {
+        field->addPrintPawn(weasel);
+    }
+    for (auto snake : Snake::snakes) {
+        field->addPrintPawn(snake);
+    }
+    for (auto chicken : Chicken::chickens) {
+        field->addPrintPawn(chicken);
+    }
+    for (auto egg : Egg::eggs) {
+        field->addPrintPawn(egg);
+    }
+    for (auto bullet : Bullet::bullets) {
+        field->addPrintPawn(bullet);
+    }
+    for (auto enemyBullet : EnemyBullet::enemyBullets) {
+        field->addPrintPawn(enemyBullet);
+    }
+    for (auto walker : Walker::walkers) {
+        field->addPrintPawn(walker);
+    }
+    for (auto archer : Archer::archers) {
+        field->addPrintPawn(archer);
+    }
+}
+
+void spawnNew(sista::SwappableField* field) {
+    if (walkerSpawnDistribution(rng)) {
+        sista::Coordinates coordinates = {rand() % 30, rand() % 70};
+        if (field->isFree(coordinates)) {
+            Walker::walkers.push_back(new Walker(coordinates));
+            field->addPrintPawn(Walker::walkers.back());
+        }
+    }
+    if (archerSpawnDistribution(rng)) {
+        sista::Coordinates coordinates = {rand() % 30, rand() % 70};
+        if (field->isFree(coordinates)) {
+            Archer::archers.push_back(new Archer(coordinates));
+            field->addPrintPawn(Archer::archers.back());
+        }
+    }
+    if (weaselSpawnDistribution(rng)) {
+        sista::Coordinates coordinates = {rand() % 30, 0};
+        if (field->isFree(coordinates)) {
+            Weasel::weasels.push_back(new Weasel(coordinates, Direction::RIGHT));
+            field->addPrintPawn(Weasel::weasels.back());
+        }
+    }
+    if (snakeSpawnDistribution(rng)) {
+        sista::Coordinates coordinates = {rand() % 20, 69};
+        if (field->isFree(coordinates)) {
+            Snake::snakes.push_back(new Snake(coordinates, Direction::LEFT));
+            field->addPrintPawn(Snake::snakes.back());
+        }
+    }
+    if (wallSpawnDistribution(rng)) {
+        sista::Coordinates coordinates = {rand() % 30, rand() % 70};
+        if (field->isFree(coordinates)) {
+            Wall::walls.push_back(new Wall(coordinates, 3));
+            field->addPrintPawn(Wall::walls.back());
         }
     }
 }
@@ -879,9 +1071,28 @@ void Weasel::move() {
             // Eat the chicken
             Chicken::removeChicken((Chicken*)entity);
         } else if (entity->type == Type::EGG) {
-            // Jump over the egg or the gate
-            this->move();
-            return;
+            // Jump over the egg
+            if (direction == Direction::RIGHT) {
+                nextCoordinates = coordinates + directionMap[Direction::DOWN];
+            } else {
+                nextCoordinates = coordinates + directionMap[Direction::UP];
+            }
+            if (field->isFree(nextCoordinates)) {
+                field->movePawn(this, nextCoordinates);
+                coordinates = nextCoordinates;
+                return;
+            } // Otherwise change direction
+        } else if (entity->type == Type::GATE) {
+            if (day) {
+                // passing through the gate
+                nextCoordinates = coordinates + directionMap[direction]*2;
+                // if it is free then pass, otherwise change direction
+                if (field->isFree(nextCoordinates)) {
+                    field->movePawn(this, nextCoordinates);
+                    coordinates = nextCoordinates;
+                    return;
+                }
+            }
         }
         direction = (direction == Direction::RIGHT) ? Direction::LEFT : Direction::RIGHT;
         symbol = (direction == Direction::RIGHT) ? '}' : '{';
@@ -1014,6 +1225,139 @@ void Walker::removeWalker(Walker* walker) {
 }
 Walker::Walker(sista::Coordinates coordinates) : Entity('Z', coordinates, walkerStyle, Type::WALKER) {}
 Walker::Walker() : Entity('Z', {0, 0}, walkerStyle, Type::WALKER) {}
+void Walker::move() {
+    sista::Coordinates nextCoordinates = coordinates;
+    sista::Coordinates playerCoordinates = Player::player->getCoordinates();
+    if (playerCoordinates.x == coordinates.x) {
+        if (playerCoordinates.y < coordinates.y) {
+            nextCoordinates.y--;
+        } else {
+            nextCoordinates.y++;
+        }
+    } else if (playerCoordinates.y == coordinates.y) {
+        if (playerCoordinates.x < coordinates.x) {
+            nextCoordinates.x--;
+        } else {
+            nextCoordinates.x++;
+        }
+    } else {
+        // The same applies for x = p.x +- 2 and y = p.y +- 2, the walker will move towards the player
+        if (playerCoordinates.x < coordinates.x) {
+            if (coordinates.x - playerCoordinates.x <= 2) {
+                if (playerCoordinates.y < coordinates.y) {
+                    nextCoordinates.y--;
+                } else {
+                    nextCoordinates.y++;
+                }
+            } else {
+                // Randomly choose the direction
+                nextCoordinates = coordinates + directionMap[(Direction)(rand() % 4)];
+            }
+        } else {
+            if (playerCoordinates.x - coordinates.x <= 2) {
+                if (playerCoordinates.y < coordinates.y) {
+                    nextCoordinates.y--;
+                } else {
+                    nextCoordinates.y++;
+                }
+            } else {
+                // Randomly choose the direction
+                nextCoordinates = coordinates + directionMap[(Direction)(rand() % 4)];
+            }
+        }
+        if (playerCoordinates.y < coordinates.y) {
+            if (coordinates.y - playerCoordinates.y <= 2) {
+                if (playerCoordinates.x < coordinates.x) {
+                    nextCoordinates.x--;
+                } else {
+                    nextCoordinates.x++;
+                }
+            } else {
+                // Randomly choose the direction
+                nextCoordinates = coordinates + directionMap[(Direction)(rand() % 4)];
+            }
+        } else {
+            if (playerCoordinates.y - coordinates.y <= 2) {
+                if (playerCoordinates.x < coordinates.x) {
+                    nextCoordinates.x--;
+                } else {
+                    nextCoordinates.x++;
+                }
+            } else {
+                // Randomly choose the direction
+                nextCoordinates = coordinates + directionMap[(Direction)(rand() % 4)];
+            }
+        }
+    }
+    if (field->isOutOfBounds(nextCoordinates)) {
+        return;
+    } else if (field->isFree(nextCoordinates)) {
+        field->movePawn(this, nextCoordinates);
+        coordinates = nextCoordinates;
+    } else if (field->isOccupied(nextCoordinates)) {
+        Entity* entity = (Entity*)field->getPawn(nextCoordinates);
+        if (entity->type == Type::WALL) {
+            // Walkers break walls
+            Wall* wall = (Wall*)entity;
+            wall->strength--;
+            if (wall->strength == 0) {
+                wall->setSymbol('@'); // Change the symbol to '@' to indicate that the wall was destroyed
+                field->rePrintPawn(wall); // It will be reprinted in the next frame and then removed because of (strength == 0)
+            }
+        } else if (entity->type == Type::CHEST) {
+            Chest *chest = (Chest*)entity;
+            if (chest->inventory.meat == 0) {
+                // if there is no meat in the chest, the walker is angry and destroys the chest
+                Chest::removeChest(chest);
+            } else {
+                chest->inventory.meat--; // The walker eats the meat
+            }
+        } else if (entity->type == Type::MINE) {
+            Mine* mine = (Mine*)entity;
+            mine->triggered = true;
+        } else if (entity->type == Type::WEASEL) {
+            // The weasel is scared and runs away
+            for (int j=0; j<3; j++) {
+                sista::Coordinates nextCoordinates = coordinates + directionMap[(Direction)(rand() % 4)];
+                if (field->isFree(nextCoordinates)) {
+                    field->movePawn(this, nextCoordinates);
+                    coordinates = nextCoordinates;
+                    return;
+                }
+            }
+            if (field->isFree(nextCoordinates)) {
+                field->movePawn(this, nextCoordinates);
+                coordinates = nextCoordinates;
+            }
+        } else if (entity->type == Type::SNAKE) {
+            // The two don't care about each other and just swap places
+            field->swapTwoPawns(this, (Walker*)entity); // WARNING: really hope this works
+        } else if (entity->type == Type::GATE || entity->type == Type::TRAP) {
+            // The walker can't pass through the gate and the trap is too small to be triggered
+        } else if (entity->type == Type::CHICKEN) {
+            // The chicken is scared and moves randomly
+            for (int j=0; j<3; j++) {
+                sista::Coordinates nextCoordinates = coordinates + directionMap[(Direction)(rand() % 4)];
+                if (field->isFree(nextCoordinates)) {
+                    field->movePawn(this, nextCoordinates);
+                    coordinates = nextCoordinates;
+                    return;
+                }
+            }
+            // So if the chicken moved out of the way, the walker can move
+            if (field->isFree(nextCoordinates)) {
+                field->movePawn(this, nextCoordinates);
+                coordinates = nextCoordinates;
+            }
+        } else if (entity->type == Type::EGG) {
+            // The egg is broken when the walker steps on it
+            Egg::removeEgg((Egg*)entity);
+            // So the walker can move
+            field->movePawn(this, nextCoordinates);
+            coordinates = nextCoordinates;
+        }
+    }
+}
 
 ANSI::Settings Archer::archerStyle = {
     ANSI::ForegroundColor::F_RED,
@@ -1027,6 +1371,114 @@ void Archer::removeArcher(Archer* archer) {
 }
 Archer::Archer(sista::Coordinates coordinates) : Entity('A', coordinates, archerStyle, Type::ARCHER) {}
 Archer::Archer() : Entity('A', {0, 0}, archerStyle, Type::ARCHER) {}
+void Archer::move() {
+    Direction direction = (Direction)(rand() % 4);
+    sista::Coordinates nextCoordinates = coordinates + directionMap[direction];
+    if (field->isOutOfBounds(nextCoordinates)) {
+        return;
+    } else if (field->isOccupied(nextCoordinates)) {
+        Entity* entity = (Entity*)field->getPawn(nextCoordinates);
+        if (entity->type == Type::WALL) {
+            Wall* wall = (Wall*)entity;
+            wall->strength--;
+            if (wall->strength == 0) {
+                wall->setSymbol('@'); // Change the symbol to '@' to indicate that the wall was destroyed
+                field->rePrintPawn(wall); // It will be reprinted in the next frame and then removed because of (strength == 0)
+            }
+        } else if (entity->type == Type::CHEST) {
+            Chest *chest = (Chest*)entity;
+            if (chest->inventory.eggs == 0) {
+                // if there is no egg in the chest, the archer is angry and destroys the chest
+                Chest::removeChest(chest);
+            } else {
+                chest->inventory.eggs--; // The archer eats the egg
+            }
+        } else if (entity->type == Type::MINE) {
+            Mine* mine = (Mine*)entity;
+            mine->triggered = true;
+        } else if (entity->type == Type::TRAP || entity->type == Type::GATE) {
+            // The archer can't pass through the gate and the trap is too small to be triggered
+        } else if (entity->type == Type::WEASEL) {
+            // The weasel is scared and runs away
+            for (int j=0; j<3; j++) {
+                sista::Coordinates nextCoordinates = coordinates + directionMap[(Direction)(rand() % 4)];
+                if (field->isFree(nextCoordinates)) {
+                    field->movePawn(this, nextCoordinates);
+                    coordinates = nextCoordinates;
+                    return;
+                }
+            }
+            if (field->isFree(nextCoordinates)) {
+                field->movePawn(this, nextCoordinates);
+                coordinates = nextCoordinates;
+            }
+        } else if (entity->type == Type::SNAKE) {
+            // The snake is scared and moves randomly
+            for (int j=0; j<3; j++) {
+                sista::Coordinates nextCoordinates = coordinates + directionMap[(Direction)(rand() % 4)];
+                if (field->isFree(nextCoordinates)) {
+                    field->movePawn(this, nextCoordinates);
+                    coordinates = nextCoordinates;
+                    return;
+                }
+            }
+            if (field->isFree(nextCoordinates)) {
+                field->movePawn(this, nextCoordinates);
+                coordinates = nextCoordinates;
+            }
+        } else if (entity->type == Type::CHICKEN) {
+            // The chicken is scared and moves randomly
+            for (int j=0; j<3; j++) {
+                sista::Coordinates nextCoordinates = coordinates + directionMap[(Direction)(rand() % 4)];
+                if (field->isFree(nextCoordinates)) {
+                    field->movePawn(this, nextCoordinates);
+                    coordinates = nextCoordinates;
+                    return;
+                }
+            }
+            if (field->isFree(nextCoordinates)) {
+                field->movePawn(this, nextCoordinates);
+                coordinates = nextCoordinates;
+            }
+        } else if (entity->type == Type::EGG) {
+            // The egg is broken when the archer accidentally steps on it
+            Egg::removeEgg((Egg*)entity);
+            if (field->isFree(nextCoordinates)) {
+                field->movePawn(this, nextCoordinates);
+                coordinates = nextCoordinates;
+            }
+        }
+    } else if (field->isFree(nextCoordinates)) {
+        field->movePawn(this, nextCoordinates);
+        coordinates = nextCoordinates;
+    }
+}
+void Archer::shoot() {
+    Direction direction;;
+    sista::Coordinates playerCoordinates = Player::player->getCoordinates();
+    if (playerCoordinates.x == coordinates.x) {
+        // The arrow will be shot in the y direction towards the player
+        if (playerCoordinates.y < coordinates.y)
+            direction = Direction::UP;
+        else
+            direction = Direction::DOWN;
+    } else if (playerCoordinates.y == coordinates.y) {
+        if (playerCoordinates.x < coordinates.x)
+            direction = Direction::LEFT;
+        else
+            direction = Direction::RIGHT;
+    } else {
+        direction = (Direction)(rand() % 4);
+    }
+    sista::Coordinates nextCoordinates = coordinates + directionMap[direction];
+    if (field->isFree(nextCoordinates)) {
+        EnemyBullet::enemyBullets.push_back(new EnemyBullet(nextCoordinates, direction));
+        field->addPrintPawn(EnemyBullet::enemyBullets.back());
+    } else {
+        // For the moment I would just give up this option, because the player doesn't know what's going on
+    }
+}
+
 
 void removeNullptrs(std::vector<Entity*>& entities) {
     for (unsigned i=0; i<entities.size(); i++) {

@@ -33,9 +33,9 @@ extern std::mt19937 rng;
 
 
 struct Inventory {
-    unsigned short walls = 0;
-    unsigned short eggs = 0;
-    unsigned short meat = 0;
+    short walls = 0;
+    short eggs = 0;
+    short meat = 0;
 
     void operator+=(const Inventory&);
 }; // The idea is that the inventory can be dropped (as CHEST) and picked up by the player
@@ -269,4 +269,6 @@ public:
 
 void input();
 void populate(sista::SwappableField*);
+void repopulate(sista::SwappableField*);
+void spawnNew(sista::SwappableField*);
 void removeNullptrs(std::vector<Entity*>&);
