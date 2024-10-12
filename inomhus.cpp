@@ -261,7 +261,12 @@ int main(int argc, char** argv) {
             // repopulate the field from scratch for preventing nullptr pawns from laying around
             repopulate(field);
         }
+        #if __linux__
         if (i % 10 == 9) {
+        #elif __APPLE__ or _WIN32
+        if (i % 100 == 99) {
+        #endif
+            sista::clearScreen();
             // reprint the field every 10 frames
             sista::clearScreen();
             field->print(border);
@@ -619,11 +624,17 @@ void Player::move(Direction direction) {
         } else if (entity->type == Type::GATE) {
             if (day) {
                 // Pass through the gate
-                this->move(direction);
-                return;
-            } else {
-                return;
-            }
+                nextCoordinates = coordinates + directionMap[direction]*2;
+                if (field->isOutOfBounds(nextCoordinates)) {
+                    return;
+                } else if (field->isOccupied(nextCoordinates)) {
+                    return;
+                } else if (field->isFree(nextCoordinates)) {
+                    field->movePawn(this, nextCoordinates);
+                    coordinates = nextCoordinates;
+                    return;
+                }
+            } // else, the gate is closed
         } else if (entity->type == Type::TRAP || entity->type == Type::WALL) {
             return;
         } else if (entity->type == Type::BULLET || entity->type == Type::ENEMYBULLET || entity->type == Type::WALKER) {
@@ -1089,8 +1100,13 @@ void Weasel::move() {
         } else if (entity->type == Type::GATE) {
             if (day) {
                 // passing through the gate
-                this->move();
-                return;
+                nextCoordinates = coordinates + directionMap[direction]*2;
+                // if it is free then pass, otherwise change direction
+                if (field->isFree(nextCoordinates)) {
+                    field->movePawn(this, nextCoordinates);
+                    coordinates = nextCoordinates;
+                    return;
+                }
             }
         } else if (entity->type == Type::CHICKEN) {
             // Eat the chicken
@@ -1098,9 +1114,9 @@ void Weasel::move() {
         } else if (entity->type == Type::EGG) {
             // Jump over the egg
             if (direction == Direction::RIGHT) {
-                nextCoordinates = coordinates + directionMap[Direction::DOWN];
-            } else {
                 nextCoordinates = coordinates + directionMap[Direction::UP];
+            } else {
+                nextCoordinates = coordinates + directionMap[Direction::DOWN];
             }
             if (field->isFree(nextCoordinates)) {
                 field->movePawn(this, nextCoordinates);
@@ -1161,7 +1177,16 @@ void Snake::move() {
         } else if (entity->type == Type::SNAKE) {
             Snake::removeSnake((Snake*)entity);
         } else if (entity->type == Type::GATE) {
-            Gate::removeGate((Gate*)entity);
+            if (day) { // Or maybe the snake should be able to sneak through the closed gate
+                // passing through the gate
+                nextCoordinates = coordinates + directionMap[direction]*2;
+                // if it is free then pass, otherwise change direction
+                if (field->isFree(nextCoordinates)) {
+                    field->movePawn(this, nextCoordinates);
+                    coordinates = nextCoordinates;
+                    return;
+                }
+            }
         } else if (entity->type == Type::CHICKEN) {
             Chicken::removeChicken((Chicken*)entity);
         } else if (entity->type == Type::EGG) {
