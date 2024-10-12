@@ -12,6 +12,8 @@ However the world is not as friendly as it may seem at daylight, there are snake
 
 But, as it often happens in life, the worst enemy is yourself: when the night comes the character goes **out of control** and as a player you cannot control your character anymore, you can only watch it move around, destroy its own inventory and put itself in real danger.
 
+Will you be able to build a house before the night comes? When it happens all the gates (`=`) will be closed and your fury will be unleashed.
+
 ## Installation
 
 ### From source
@@ -26,7 +28,13 @@ make
 
 Go to the [repository](https://github.com/FLAK-ZOSO/Inomhus) page and download the executable for your system.
 
+- [Linux](https://github.com/FLAK-ZOSO/Inomhus/blob/main/inomhus)
+- [Windows](https://github.com/FLAK-ZOSO/Inomhus/blob/main/inomhus.exe)
+- [MacOS](https://github.com/FLAK-ZOSO/Inomhus/blob/main/inomhusApple)
+
 ## Usage
+
+Open your ANSI terminal - on Windows you should use Windows Terminal while on Linux and MacOS you can use the default terminal - and run the executable.
 
 ```bash
 ./inomhus
@@ -36,7 +44,13 @@ Go to the [repository](https://github.com/FLAK-ZOSO/Inomhus) page and download t
 inomhus.exe
 ```
 
+If it doesn't seem to work and you just downloaded the executable, you may need to give it the right permissions or simply compile it from source as explained above.
+
+Use a proper zoom, read the controls and enjoy the game.
+
 ## Controls
+
+⚠️ - on Apple systems you will have to press `enter` for sending commands, sadly
 
 Movement controls.
 
