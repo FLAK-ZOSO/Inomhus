@@ -729,6 +729,9 @@ void Player::shoot(Direction direction) {
         }
     } else if (field->isFree(targetCoordinates)) {
         if (mode == Mode::BULLET) {
+            if (inventory.eggs <= 0) {
+                return;
+            }
             inventory.eggs--;
             Bullet::bullets.push_back(new Bullet(targetCoordinates, direction));
             field->addPrintPawn(Bullet::bullets.back());
@@ -743,20 +746,26 @@ void Player::shoot(Direction direction) {
                 inventory.walls--;
             }
         } else if (mode == Mode::GATE) {
-            inventory.walls -= 2;
-            inventory.eggs--;
-            Gate::gates.push_back(new Gate(targetCoordinates));
-            field->addPrintPawn(Gate::gates.back());
+            if (inventory.walls >= 2 && inventory.eggs > 0) {
+                inventory.walls -= 2;
+                inventory.eggs--;
+                Gate::gates.push_back(new Gate(targetCoordinates));
+                field->addPrintPawn(Gate::gates.back());
+            }
         } else if (mode == Mode::TRAP) {
-            inventory.walls--;
-            inventory.eggs--;
-            Trap::traps.push_back(new Trap(targetCoordinates));
-            field->addPrintPawn(Trap::traps.back());
+            if (inventory.walls > 0 && inventory.eggs > 0) {
+                inventory.walls--;
+                inventory.eggs--;
+                Trap::traps.push_back(new Trap(targetCoordinates));
+                field->addPrintPawn(Trap::traps.back());
+            }
         } else if (mode == Mode::MINE) {
-            inventory.walls--;
-            inventory.eggs -= 3;
-            Mine::mines.push_back(new Mine(targetCoordinates));
-            field->addPrintPawn(Mine::mines.back());
+            if (inventory.walls > 0 && inventory.eggs >= 3) {
+                inventory.walls--;
+                inventory.eggs -= 3;
+                Mine::mines.push_back(new Mine(targetCoordinates));
+                field->addPrintPawn(Mine::mines.back());
+            }
         } else if (mode == Mode::HATCH) {
             if (inventory.eggs > 0) {
                 if (Egg::hatchingDistribution(rng)) {
