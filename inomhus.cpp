@@ -31,7 +31,7 @@ std::bernoulli_distribution Walker::movingDistribution(0.30); // 30%
 std::bernoulli_distribution walkerSpawnDistribution(0.004); // 0.4%
 std::bernoulli_distribution archerSpawnDistribution(0.007); // 0.7%
 std::bernoulli_distribution weaselSpawnDistribution(0.01); // 1%
-std::bernoulli_distribution snakeSpawnDistribution(0.005); // 0.5%
+std::bernoulli_distribution snakeSpawnDistribution(0.01); // 1%
 // std::bernoulli_distribution chickenSpawnDistribution(0.05); // Chicken don't randomly spawn
 std::bernoulli_distribution wallSpawnDistribution(0.01); // 1%
 
@@ -437,17 +437,17 @@ void populate(sista::SwappableField* field) {
             field->addPrintPawn(Chest::chests.back());
         }
     }
-    // Walkers, some randomly around the field
+    // Walkers, some randomly around the field, but none of them in a 5x5 square around the player, which starts in {0, 0}
     for (int i=0; i<5; i++) {
         coordinates = {rand() % 30, rand() % 70};
-        if (field->isFree(coordinates)) {
+        if (field->isFree(coordinates) && coordinates.y > 5 && coordinates.x > 5) {
             Walker::walkers.push_back(new Walker(coordinates));
             field->addPrintPawn(Walker::walkers.back());
         }
     }
-    // Archers, some randomly around the field
+    // Archers, some randomly around the field, but none in the same row or column as the player
     for (int i=0; i<5; i++) {
-        coordinates = {rand() % 30, rand() % 70};
+        coordinates = {rand() % 25 + 5, rand() % 65 + 5};
         if (field->isFree(coordinates)) {
             Archer::archers.push_back(new Archer(coordinates));
             field->addPrintPawn(Archer::archers.back());
@@ -637,7 +637,7 @@ void Player::move(Direction direction) {
             } // else, the gate is closed
         } else if (entity->type == Type::TRAP || entity->type == Type::WALL) {
             return;
-        } else if (entity->type == Type::BULLET || entity->type == Type::ENEMYBULLET || entity->type == Type::WALKER) {
+        } else if (entity->type == Type::BULLET || entity->type == Type::ENEMYBULLET || entity->type == Type::WALKER || entity->type == Type::ARCHER) {
             end = true;
             return;
         }
