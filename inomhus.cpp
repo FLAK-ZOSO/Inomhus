@@ -219,6 +219,7 @@ int main(int argc, char** argv) {
         for (auto mine : Mine::mines) {
             if (mine->triggered) {
                 mine->explode();
+                mine->alive = false;
             }
         }
         for (auto mine : Mine::mines) {
