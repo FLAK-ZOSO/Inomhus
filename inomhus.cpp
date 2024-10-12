@@ -772,10 +772,18 @@ void Player::move(Direction direction) {
                     return;
                 }
             } // else, the gate is closed
-        } else if (entity->type == Type::TRAP || entity->type == Type::WALL) {
             return;
-        } else if (entity->type == Type::BULLET || entity->type == Type::ENEMYBULLET || entity->type == Type::WALKER || entity->type == Type::ARCHER) {
+        } else if (entity->type == Type::TRAP || entity->type == Type::WALL || entity->type == Type::BULLET) {
+            return;
+        } else if (entity->type == Type::ENEMYBULLET || entity->type == Type::WALKER || entity->type == Type::ARCHER) {
             end = true;
+            ANSI::reset();
+            cursor.set(HEIGHT, 80);
+            ANSI::setAttribute(ANSI::Attribute::BLINK);
+            ANSI::setBackgroundColor(ANSI::BackgroundColor::B_RED);
+            ANSI::setForegroundColor(ANSI::ForegroundColor::F_BLACK);
+            std::cout << "You ran into an enemy entity!";
+            ANSI::reset();
             return;
         }
     }
@@ -1050,6 +1058,13 @@ void EnemyBullet::move() { // Pretty sure there's a segfault here
         if (hitten->type == Type::PLAYER) {
             // lose();
             end = true;
+            ANSI::reset();
+            cursor.set(HEIGHT, 80);
+            ANSI::setAttribute(ANSI::Attribute::BLINK);
+            ANSI::setBackgroundColor(ANSI::BackgroundColor::B_RED);
+            ANSI::setForegroundColor(ANSI::ForegroundColor::F_BLACK);
+            std::cout << "You were hit by an enemy bullet!";
+            ANSI::reset();
         } else if (hitten->type == Type::WALL) {
             Wall* wall = (Wall*)hitten;
             wall->strength--;
@@ -1246,7 +1261,7 @@ void Weasel::move() {
                     coordinates = nextCoordinates;
                     return;
                 }
-            }
+            } // Otherwise change direction
         } else if (entity->type == Type::CHICKEN) {
             // Eat the chicken
             Chicken::removeChicken((Chicken*)entity);
@@ -1262,17 +1277,9 @@ void Weasel::move() {
                 coordinates = nextCoordinates;
                 return;
             } // Otherwise change direction
-        } else if (entity->type == Type::GATE) {
-            if (day) {
-                // passing through the gate
-                nextCoordinates = coordinates + directionMap[direction]*2;
-                // if it is free then pass, otherwise change direction
-                if (field->isFree(nextCoordinates)) {
-                    field->movePawn(this, nextCoordinates);
-                    coordinates = nextCoordinates;
-                    return;
-                }
-            }
+        } else if (entity->type == Type::BULLET || entity->type == Type::ENEMYBULLET) {
+            caught = true; // The weasel will be removed
+            return;
         }
         direction = (direction == Direction::RIGHT) ? Direction::LEFT : Direction::RIGHT;
         symbol = (direction == Direction::RIGHT) ? '}' : '{';
