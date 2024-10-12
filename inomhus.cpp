@@ -5,6 +5,8 @@
 #include <thread>
 #include <chrono>
 
+#define DAY_DURATION 500
+#define NIGHT_DURATION 200
 
 Player* Player::player;
 std::vector<Walker*> Walker::walkers;
@@ -67,6 +69,8 @@ int main(int argc, char** argv) {
     field->print(border);
 
     std::thread th(input);
+    int dayCountdown = NIGHT_DURATION;
+    int nightCountdown = DAY_DURATION;
     for (int i=0; !end; i++) {
         if (pause_) {
             while (pause_) {
@@ -79,8 +83,15 @@ int main(int argc, char** argv) {
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
 
-        if (i % 500 == 499) {
+        if (day) {
+            nightCountdown--;
+        } else {
+            dayCountdown--;
+        } // This could be golfed lol, but it's clearer this way
+        if (dayCountdown <= 0 || nightCountdown <= 0) {
             day = !day;
+            dayCountdown = NIGHT_DURATION;
+            nightCountdown = DAY_DURATION;
             if (day) {
                 border = sista::Border(
                     '@', {
@@ -181,7 +192,7 @@ int main(int argc, char** argv) {
                 mine->checkTrigger();
             }
         }
-        for (int c=0; c<Chest::chests.size(); c++) {
+        for (unsigned c=0; c<Chest::chests.size(); c++) {
             if (c >= Chest::chests.size()) break;
             Chest* chest = Chest::chests[c];
             if (chest == nullptr) continue;
@@ -189,7 +200,7 @@ int main(int argc, char** argv) {
                 Chest::removeChest(chest);
             }
         }
-        for (int c=0; c<Chicken::chickens.size(); c++) {
+        for (unsigned c=0; c<Chicken::chickens.size(); c++) {
             if (c >= Chicken::chickens.size()) break;
             Chicken* chicken = Chicken::chickens[c];
             if (chicken == nullptr) continue;
@@ -197,7 +208,7 @@ int main(int argc, char** argv) {
                 chicken->move();
             }
         }
-        for (int w=0; w<Walker::walkers.size(); w++) {
+        for (unsigned w=0; w<Walker::walkers.size(); w++) {
             if (w >= Walker::walkers.size()) break;
             Walker* walker = Walker::walkers[w];
             if (walker == nullptr) continue;
@@ -205,7 +216,7 @@ int main(int argc, char** argv) {
                 walker->move();
             }
         }
-        for (int a=0; a<Archer::archers.size(); a++) {
+        for (unsigned a=0; a<Archer::archers.size(); a++) {
             if (a >= Archer::archers.size()) break;
             Archer* archer = Archer::archers[a];
             if (archer == nullptr) continue;
@@ -216,19 +227,19 @@ int main(int argc, char** argv) {
                 archer->shoot();
             }
         }
-        for (int w=0; w<Weasel::weasels.size(); w++) {
+        for (unsigned w=0; w<Weasel::weasels.size(); w++) {
             if (w >= Weasel::weasels.size()) break;
             Weasel* weasel = Weasel::weasels[w];
             if (weasel == nullptr) continue;
             weasel->move();
         }
-        for (int s=0; s<Snake::snakes.size(); s++) {
+        for (unsigned s=0; s<Snake::snakes.size(); s++) {
             if (s >= Snake::snakes.size()) break;
             Snake* snake = Snake::snakes[s];
             if (snake == nullptr) continue;
             snake->move();
         }
-        for (int w=0; w<Wall::walls.size(); w++) {
+        for (unsigned w=0; w<Wall::walls.size(); w++) {
             if (w >= Wall::walls.size()) break;
             Wall* wall = Wall::walls[w];
             if (wall == nullptr) continue;
@@ -237,7 +248,7 @@ int main(int argc, char** argv) {
             }
         }
         // Iterate over wild animals to see if they have reached the other side of the field or they have been caught
-        for (int w=0; w<Weasel::weasels.size(); w++) {
+        for (unsigned w=0; w<Weasel::weasels.size(); w++) {
             if (w >= Weasel::weasels.size()) break;
             Weasel* weasel = Weasel::weasels[w];
             if (weasel == nullptr) continue;
@@ -248,7 +259,7 @@ int main(int argc, char** argv) {
                 Player::player->inventory.meat++;
             }
         }
-        for (int s=0; s<Snake::snakes.size(); s++) {
+        for (unsigned s=0; s<Snake::snakes.size(); s++) {
             if (s >= Snake::snakes.size()) break;
             Snake* snake = Snake::snakes[s];
             if (snake == nullptr) continue;
@@ -277,7 +288,9 @@ int main(int argc, char** argv) {
         // Print the inventory
         ANSI::reset();
         cursor.set(10, 80);
+        ANSI::setAttribute(ANSI::Attribute::BRIGHT);
         std::cout << "Inventory\n";
+        ANSI::resetAttribute(ANSI::Attribute::BRIGHT);
         cursor.set(11, 80);
         std::cout << "Walls: " << Player::player->inventory.walls << "   \n";
         cursor.set(12, 80);
@@ -313,6 +326,15 @@ int main(int argc, char** argv) {
                 break;
         }
         std::cout << "   ";
+        cursor.set(20, 80);
+        ANSI::setAttribute(ANSI::Attribute::BRIGHT);
+        std::cout << "Time before ";
+        if (day) {
+            std::cout << "night: " << nightCountdown << "    \n";
+        } else {
+            std::cout << "day: " << dayCountdown << "    \n";
+        }
+        ANSI::resetAttribute(ANSI::Attribute::BRIGHT);
         std::flush(std::cout);
     }
 
@@ -340,70 +362,91 @@ void input() {
             input = getchar();
         #endif
         if (end) return;
-        switch (input) {
-            case 'w': case 'W':
-                Player::player->move(Direction::UP);
-                break;
-            case 'd': case 'D':
-                Player::player->move(Direction::RIGHT);
-                break;
-            case 's': case 'S':
-                Player::player->move(Direction::DOWN);
-                break;
-            case 'a': case 'A':
-                Player::player->move(Direction::LEFT);
-                break;
-
-            case 'j': case 'J':
-                Player::player->shoot(Direction::LEFT);
-                break;
-            case 'k': case 'K':
-                Player::player->shoot(Direction::DOWN);
-                break;
-            case 'l': case 'L':
-                Player::player->shoot(Direction::RIGHT);
-                break;
-            case 'i': case 'I':
-                Player::player->shoot(Direction::UP);
-                break;
-
-            case 'c': case 'C':
-                Player::player->mode = Player::Mode::COLLECT;
-                break;
-            case 'b': case 'B':
-                Player::player->mode = Player::Mode::BULLET;
-                break;
-            case 'e': case 'E': case 'q':
-                Player::player->mode = Player::Mode::DUMPCHEST;
-                break;
-            case '=': case '0': case '#':
-                Player::player->mode = Player::Mode::WALL;
-                break;
-            case 'g': case 'G':
-                Player::player->mode = Player::Mode::GATE;
-                break;
-            case 't': case 'T':
-                Player::player->mode = Player::Mode::TRAP;
-                break;
-            case 'm': case 'M': case '*':
-                Player::player->mode = Player::Mode::MINE;
-                break;
-            case 'h': case 'H':
-                Player::player->mode = Player::Mode::HATCH;
-                break;
-
-            case '+': case '-':
-                speedup = !speedup;
-                break;
-            case '.': case 'p': case 'P':
-                pause_ = !pause_;
-                break;
-            case 'Q': /* case 'q': */
-                end = true;
-                return;
-            default:
-                break;
+        if (day) {
+            act(input);
+        } else {
+            // At night only game control keys are processed
+            switch (input) {
+                case '+': case '-':
+                    speedup = !speedup;
+                    break;
+                case '.': case 'p': case 'P':
+                    pause_ = !pause_;
+                    break;
+                case 'Q': /* case 'q': */
+                    end = true;
+                    return;
+                default:
+                    break;
+            }
         }
+    }
+}
+
+void act(char input) {
+    switch (input) {
+        case 'w': case 'W':
+            Player::player->move(Direction::UP);
+            break;
+        case 'd': case 'D':
+            Player::player->move(Direction::RIGHT);
+            break;
+        case 's': case 'S':
+            Player::player->move(Direction::DOWN);
+            break;
+        case 'a': case 'A':
+            Player::player->move(Direction::LEFT);
+            break;
+
+        case 'j': case 'J':
+            Player::player->shoot(Direction::LEFT);
+            break;
+        case 'k': case 'K':
+            Player::player->shoot(Direction::DOWN);
+            break;
+        case 'l': case 'L':
+            Player::player->shoot(Direction::RIGHT);
+            break;
+        case 'i': case 'I':
+            Player::player->shoot(Direction::UP);
+            break;
+
+        case 'c': case 'C':
+            Player::player->mode = Player::Mode::COLLECT;
+            break;
+        case 'b': case 'B':
+            Player::player->mode = Player::Mode::BULLET;
+            break;
+        case 'e': case 'E': case 'q':
+            Player::player->mode = Player::Mode::DUMPCHEST;
+            break;
+        case '=': case '0': case '#':
+            Player::player->mode = Player::Mode::WALL;
+            break;
+        case 'g': case 'G':
+            Player::player->mode = Player::Mode::GATE;
+            break;
+        case 't': case 'T':
+            Player::player->mode = Player::Mode::TRAP;
+            break;
+        case 'm': case 'M': case '*':
+            Player::player->mode = Player::Mode::MINE;
+            break;
+        case 'h': case 'H':
+            Player::player->mode = Player::Mode::HATCH;
+            break;
+
+        case '+': case '-':
+            speedup = !speedup;
+            break;
+        case '.': case 'p': case 'P':
+            pause_ = !pause_;
+            break;
+        case 'Q': /* case 'q': */
+            end = true;
+            return;
+        default:
+            break;
     }
 }
 

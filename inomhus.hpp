@@ -268,6 +268,7 @@ public:
 };
 
 void input();
+void act(char);
 void populate(sista::SwappableField*);
 void repopulate(sista::SwappableField*);
 void spawnNew(sista::SwappableField*);
