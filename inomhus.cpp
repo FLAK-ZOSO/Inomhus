@@ -644,6 +644,9 @@ void Player::shoot(Direction direction) {
         if (entity->type == Type::WALL) {
             Wall* wall = (Wall*)entity;
             if (mode == Mode::BULLET) {
+                if (inventory.eggs <= 0) {
+                    return;
+                }
                 wall->strength--;
                 if (wall->strength == 0) {
                     wall->setSymbol('@'); // Change the symbol to '@' to indicate that the wall was destroyed
@@ -668,44 +671,57 @@ void Player::shoot(Direction direction) {
             mine->triggered = true;
         } else if (entity->type == Type::TRAP) {
             if (mode == Mode::BULLET) {
-                inventory.eggs--;
-                Trap::removeTrap((Trap*)entity);
+                if (inventory.eggs > 0) {
+                    inventory.eggs--;
+                    Trap::removeTrap((Trap*)entity);
+                }
             }
         } else if (entity->type == Type::WEASEL) {
             if (mode == Mode::BULLET) {
-                inventory.eggs--;
-                inventory.meat++;
-                Weasel::removeWeasel((Weasel*)entity);
+                if (inventory.eggs > 0) {
+                    inventory.eggs--;
+                    inventory.meat++;
+                    Weasel::removeWeasel((Weasel*)entity);
+                }
             } else if (mode == Mode::COLLECT) {
                 inventory.meat++;
                 Weasel::removeWeasel((Weasel*)entity);
             }
         } else if (entity->type == Type::SNAKE) {
             if (mode == Mode::BULLET) {
-                inventory.eggs--;
-                inventory.meat++;
-                Snake::removeSnake((Snake*)entity);
+                if (inventory.eggs > 0) {
+                    inventory.eggs--;
+                    inventory.meat++;
+                    Snake::removeSnake((Snake*)entity);
+                }
             } else if (mode == Mode::COLLECT) {
                 inventory.meat++;
                 Snake::removeSnake((Snake*)entity);
             }
         } else if (entity->type == Type::GATE) {
             if (mode == Mode::BULLET) {
-                Gate::removeGate((Gate*)entity);
+                if (inventory.eggs > 0) {
+                    inventory.eggs--;
+                    Gate::removeGate((Gate*)entity);
+                }
             }
         } else if (entity->type == Type::CHICKEN) {
             if (mode == Mode::BULLET) {
-                inventory.eggs--;
-                inventory.meat++;
-                Chicken::removeChicken((Chicken*)entity);
+                if (inventory.eggs > 0) {
+                    inventory.eggs--;
+                    inventory.meat++;
+                    Chicken::removeChicken((Chicken*)entity);
+                }
             } else if (mode == Mode::COLLECT) {
                 inventory.meat++;
                 Chicken::removeChicken((Chicken*)entity);
             }
         } else if (entity->type == Type::EGG) {
             if (mode == Mode::BULLET) {
-                inventory.eggs--;
-                Egg::removeEgg((Egg*)entity);
+                if (inventory.eggs > 0) {
+                    inventory.eggs--;
+                    Egg::removeEgg((Egg*)entity);
+                }
             } else if (mode == Mode::COLLECT) {
                 inventory.eggs++;
                 Egg::removeEgg((Egg*)entity);
