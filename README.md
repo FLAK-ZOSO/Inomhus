@@ -2,6 +2,8 @@
 
 *Bättre att stanna **inomhus*** (better be **in the house**) is a [Sista](https://github.com/FLAK-ZOSO/Sista) based C++ terminal videogame.
 
+![alt text](banner.png)
+
 ## Description
 
 https://github.com/user-attachments/assets/629db96e-2434-4d33-a6dc-4483e72f2e3b
