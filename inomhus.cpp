@@ -118,10 +118,11 @@ int main(int argc, char** argv) {
         tutorial_ = false;
     }
     sista::clearScreen();
-    field->addPrintPawn(Player::player = new Player({0, 0}));
 
     if (tutorial_) {
         tutorial();
+    } else {
+        field->addPrintPawn(Player::player = new Player({0, 0}));
     }
 
     populate(field);
@@ -404,6 +405,7 @@ void tutorial() {
 
     sista::clearScreen();
     field->print();
+    field->addPrintPawn(Player::player = new Player({0, 0}));
     ANSI::reset();
     cursor.set(3, 10);
     std::cout << "Tutorial\n";
@@ -580,7 +582,7 @@ void tutorial() {
     Wall::wallStyle.apply();
     std::cout << "#";
     ANSI::reset();
-    std::cout << "' like you did with the egg" << std::endl;
+    std::cout << "' as explained" << std::endl;
 
     // Add a wall 5 blocks away from the player
     sista::Coordinates wallCoords = Player::player->getCoordinates();
@@ -1912,7 +1914,7 @@ void Walker::move() {
             for (int j=0; j<3; j++) {
                 sista::Coordinates nextCoordinates_ = weasel->getCoordinates() + directionMap[(Direction)(rand() % 4)];
                 if (field->isFree(nextCoordinates_)) {
-                    field->movePawn(this, nextCoordinates_);
+                    field->movePawn(weasel, nextCoordinates_);
                     weasel->setCoordinates(nextCoordinates_);
                     return;
                 }
@@ -1988,7 +1990,7 @@ void Archer::move() {
             for (int j=0; j<3; j++) {
                 sista::Coordinates nextCoordinates_ = weasel->getCoordinates() + directionMap[(Direction)(rand() % 4)];
                 if (field->isFree(nextCoordinates_)) {
-                    field->movePawn(this, nextCoordinates_);
+                    field->movePawn(weasel, nextCoordinates_);
                     weasel->setCoordinates(nextCoordinates_);
                     return;
                 }
@@ -1999,7 +2001,7 @@ void Archer::move() {
             for (int j=0; j<3; j++) {
                 sista::Coordinates nextCoordinates_ = snake->getCoordinates() + directionMap[(Direction)(rand() % 4)];
                 if (field->isFree(nextCoordinates_)) {
-                    field->movePawn(this, nextCoordinates_);
+                    field->movePawn(snake, nextCoordinates_);
                     snake->setCoordinates(nextCoordinates_);
                     return;
                 }
