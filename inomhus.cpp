@@ -1631,10 +1631,6 @@ void Walker::move() {
                     return;
                 }
             }
-            if (field->isFree(nextCoordinates)) {
-                field->movePawn(this, nextCoordinates);
-                coordinates = nextCoordinates;
-            }
         } else if (entity->type == Type::SNAKE) {
             // The two don't care about each other and just swap places
             field->swapTwoPawns(this, (Walker*)entity); // WARNING: really hope this works
@@ -1650,11 +1646,6 @@ void Walker::move() {
                     chicken->setCoordinates(nextCoordinates_);
                     break;
                 }
-            }
-            // So if the chicken moved out of the way, the walker can move
-            if (field->isFree(nextCoordinates)) {
-                field->movePawn(this, nextCoordinates);
-                coordinates = nextCoordinates;
             }
         } else if (entity->type == Type::EGG) {
             // The egg is broken when the walker steps on it
@@ -1716,10 +1707,6 @@ void Archer::move() {
                     return;
                 }
             }
-            if (field->isFree(nextCoordinates)) {
-                field->movePawn(this, nextCoordinates);
-                coordinates = nextCoordinates;
-            }
         } else if (entity->type == Type::SNAKE) {
             // The snake is scared and moves randomly
             Snake* snake = (Snake*)entity;
@@ -1731,10 +1718,6 @@ void Archer::move() {
                     return;
                 }
             }
-            if (field->isFree(nextCoordinates)) {
-                field->movePawn(this, nextCoordinates);
-                coordinates = nextCoordinates;
-            }
         } else if (entity->type == Type::CHICKEN) {
             // The chicken is scared and moves randomly
             Chicken* chicken = (Chicken*)entity;
@@ -1745,10 +1728,6 @@ void Archer::move() {
                     chicken->setCoordinates(nextCoordinates_);
                     return;
                 }
-            }
-            if (field->isFree(nextCoordinates)) {
-                field->movePawn(this, nextCoordinates);
-                coordinates = nextCoordinates;
             }
         } else if (entity->type == Type::EGG) {
             // The egg is broken when the archer accidentally steps on it
