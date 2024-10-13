@@ -251,7 +251,7 @@ int main(int argc, char** argv) {
             Egg* egg = Egg::eggs[e];
             if (egg == nullptr) continue;
             if (eggSelfHatchingDistribution(rng)) {
-                if (Egg::hatchingDistribution(rng) || Egg::hatchingDistribution(rng)) { // more probable to hatch successfully in the wild
+                if (Egg::hatchingDistribution(rng)) {
                     Egg::removeEgg(egg);
                     Chicken::chickens.push_back(new Chicken(egg->getCoordinates()));
                     field->addPrintPawn(Chicken::chickens.back());
@@ -1667,9 +1667,9 @@ void Walker::move() {
 }
 
 ANSI::Settings Archer::archerStyle = {
-    ANSI::ForegroundColor::F_RED,
+    ANSI::ForegroundColor::F_CYAN,
     ANSI::BackgroundColor::B_BLACK,
-    ANSI::Attribute::BRIGHT
+    ANSI::Attribute::STRIKETHROUGH
 };
 void Archer::removeArcher(Archer* archer) {
     Archer::archers.erase(std::find(Archer::archers.begin(), Archer::archers.end(), archer));
