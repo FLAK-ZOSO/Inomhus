@@ -347,6 +347,8 @@ int main(int argc, char** argv) {
     delete Player::player;
     field->clear();
     cursor.set(72, 0); // Move the cursor to the bottom of the screen, so the terminal is not left in a weird state
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+    flushInput();
     #if __linux__
         getch();
     #elif __APPLE__

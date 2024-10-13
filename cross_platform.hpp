@@ -3,9 +3,13 @@
     #include <windows.h>
     #include <mmsystem.h>
     // #pragma comment(lib,"winmm.lib")
-#endif
-#ifdef _WIN32
     #include <conio.h>
+
+    void flushInput() {
+        // Flush the input buffer (discard data not read yet)
+        HANDLE hInput = GetStdHandle(STD_INPUT_HANDLE);
+        FlushConsoleInputBuffer(hInput);
+    }
 #elif __APPLE__
     #include <termios.h>
 
@@ -44,5 +48,10 @@
             perror("tcsetattr ~ICANON");
         // printf("%c\n", buf);
         return buf;
+    }
+
+    void flushInput() {
+        // Flush stdin (discard data not read yet)
+        tcflush(STDIN_FILENO, TCIFLUSH);
     }
 #endif
