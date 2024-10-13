@@ -571,8 +571,43 @@ void printSideInstructions(int i, int dayCountdown, int nightCountdown) {
         std::cout << "day: " << dayCountdown << "    \n";
     }
     ANSI::resetAttribute(ANSI::Attribute::BRIGHT);
-    // Be aware not to overwrite the inventory and the time survived which use {10, 80} to ~{18, 80}
-    cursor.set(20, 80);
+    // Be aware not to overwrite the inventory and the time survived which use {3, 80} to ~{11, 80}
+    #if __linux__
+    if (i % 10 == 9) {
+    #elif __APPLE__ or _WIN32
+    if (i % 100 == 99 || i == 0) {
+    #endif
+        cursor.set(15, 80);
+        ANSI::setAttribute(ANSI::Attribute::BRIGHT);
+        std::cout << "Instructions\n";
+        ANSI::resetAttribute(ANSI::Attribute::BRIGHT);
+        cursor.set(16, 80);
+        std::cout << "Move: w | a | s | d\n";
+        cursor.set(17, 80);
+        std::cout << "Act: i | j | k | l\n";
+        cursor.set(18, 80);
+        std::cout << "Collect mode: \x1b[35mc\x1b[0m\n";
+        cursor.set(19, 80);
+        std::cout << "Bullet mode: \x1b[35mb\x1b[0m\n";
+        cursor.set(20, 80);
+        std::cout << "Dump Chest mode: \x1b[35me\x1b[0m\n";
+        cursor.set(21, 80);
+        std::cout << "Build Wall mode: \x1b[35m=\x1b[0m | \x1b[35m0\x1b[0m | \x1b[35m#\x1b[0m\n";
+        cursor.set(22, 80);
+        std::cout << "Build Gate mode: \x1b[35mg\x1b[0m\n";
+        cursor.set(23, 80);
+        std::cout << "Place Trap mode: \x1b[35mt\x1b[0m\n";
+        cursor.set(24, 80);
+        std::cout << "Place Mine mode: \x1b[35mm\x1b[0m | \x1b[35m*\x1b[0m\n";
+        cursor.set(25, 80);
+        std::cout << "Egg-hatching mode: \x1b[35mh\x1b[0m\n";
+        cursor.set(27, 80);
+        std::cout << "Speedup mode: \x1b[35m+\x1b[0m | \x1b[35m-\x1b[0m\n";
+        cursor.set(28, 80);
+        std::cout << "Pause or resume: \x1b[35m.\x1b[0m | \x1b[35mp\x1b[0m\n";
+        cursor.set(29, 80);
+        std::cout << "Q: Quit\n";
+    }
 }
 
 void deallocateMemory() {

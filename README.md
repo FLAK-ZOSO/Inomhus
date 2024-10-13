@@ -54,7 +54,6 @@ std::bernoulli_distribution wallSpawnDistribution(0.01); // 1%
 
 Having access to the source code you can also change the probabilities of the events that happen in the game, like the spawn of the enemies or the hatching of the eggs.
 
-
 ### From binary
 
 Go to the [repository](https://github.com/FLAK-ZOSO/Inomhus) page and download the executable for your system.
