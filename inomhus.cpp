@@ -2,6 +2,7 @@
 #include "inomhus.hpp"
 #include <algorithm>
 #include <fstream>
+#include <cstring>
 #include <thread>
 #include <chrono>
 #include <mutex>
@@ -108,6 +109,15 @@ int main(int argc, char** argv) {
     field = &field_;
     field->clear();
     printIntro();
+    #if defined(_WIN32) or defined(__linux__)
+        char c = getch();
+    #elif __APPLE__
+        char c = getchar();
+    #endif
+    if (c == 'n' || c == 'N') {
+        tutorial_ = false;
+    }
+    sista::clearScreen();
     field->addPrintPawn(Player::player = new Player({0, 0}));
 
     if (tutorial_) {
@@ -393,7 +403,7 @@ void tutorial() {
     */
 
     sista::clearScreen();
-    field->print(border);
+    field->print();
     ANSI::reset();
     cursor.set(3, 10);
     std::cout << "Tutorial\n";
@@ -418,7 +428,9 @@ void tutorial() {
     Chicken::chickenStyle.apply();
     std::cout << "%";
     ANSI::reset();
-    std::cout << "' symbol and lay eggs, represented by the '";
+    std::cout << "' symbol and lay eggs;";
+    cursor.set(8, 10);
+    std::cout << "Eggs are represented by the '";
     Egg::eggStyle.apply();
     std::cout << "0";
     ANSI::reset();
@@ -433,17 +445,19 @@ void tutorial() {
     Egg::eggs.push_back(new Egg({4, 5}));
     field->addPrintPawn(Egg::eggs.back());
     ANSI::reset();
-    cursor.set(8, 10);
-    std::cout << "You can collect eggs by being in a neighboring cell" << std::endl;
+    cursor.set(10, 10);
+    std::cout << "You can collect items by being in a neighboring cell" << std::endl;
     ANSI::setAttribute(ANSI::Attribute::BRIGHT);
-    cursor.set(9, 10);
-    std::cout << "Navigate to the egg with the 'w', 'a', 's', 'd' keys" << std::endl;
+    cursor.set(11, 10);
+    std::cout << "Navigate to the egg";
+    ANSI::reset();
+    std::cout << " with the 'w', 'a', 's', 'd' keys" << std::endl;
 
     while (true) {
         // Check if the player is in a neighboring cell to the egg
         int distance_y = abs(Player::player->getCoordinates().y - Egg::eggs.back()->getCoordinates().y);
         int distance_x = abs(Player::player->getCoordinates().x - Egg::eggs.back()->getCoordinates().x);
-        if (distance_y <= 0 && distance_x <= 0) {
+        if (distance_y + distance_x == 1) {
             break;
         }
         // Take input and move the player
@@ -460,8 +474,11 @@ void tutorial() {
     }
 
     ANSI::reset();
-    cursor.set(10, 10);
-    std::cout << "You are next to the egg, now press 'c' to enter collect mode" << std::endl;
+    cursor.set(12, 10);
+    std::cout << "You are next to the egg, now press 'c' to ";
+    ANSI::setAttribute(ANSI::Attribute::BRIGHT);
+    std::cout << "enter collect mode" << std::endl;
+    ANSI::reset();
     char input = '_';
     while (input != 'c' && input != 'C') {
         #if defined(_WIN32) or defined(__linux__)
@@ -470,8 +487,167 @@ void tutorial() {
             input = getchar();
         #endif
     }
+    Player::player->mode = Player::Mode::COLLECT;
 
     ANSI::reset();
+    cursor.set(13, 10);
+    std::cout << "Choose among 'i', 'j', 'k', 'l' the right direction to collect the egg" << std::endl;
+
+    while (true) {
+        // Take input and move the player
+        char input = '_';
+        while (input != 'i' && input != 'j' && input != 'k' && input != 'l') {
+            #if defined(_WIN32) or defined(__linux__)
+                input = getch();
+            #elif __APPLE__
+                input = getchar();
+            #endif
+        }
+        sista::Coordinates target = Player::player->getCoordinates();
+        switch (input) {
+            case 'i':
+                target.y--;
+                break;
+            case 'j':
+                target.x--;
+                break;
+            case 'k':
+                target.y++;
+                break;
+            case 'l':
+                target.x++;
+                break;
+        }
+        if (target == Egg::eggs.back()->getCoordinates()) {
+            Egg::removeEgg(Egg::eggs.back());
+            Player::player->inventory.eggs++;
+            break;
+        }
+        std::flush(std::cout);
+    }
+
+    ANSI::reset();
+    cursor.set(15, 10);
+    std::cout << "You have collected the egg, now press 'b' to enter bullet mode" << std::endl;
+    input = '_';
+    while (input != 'b' && input != 'B') {
+        #if defined(_WIN32) or defined(__linux__)
+            input = getch();
+        #elif __APPLE__
+            input = getchar();
+        #endif
+    }
+    Player::player->mode = Player::Mode::BULLET;
+    std::flush(std::cout);
+
+    // Add an archer 5 blocks away from the player
+    sista::Coordinates archerCoords = Player::player->getCoordinates();
+    archerCoords.y += 5;
+    Archer::archers.push_back(new Archer(archerCoords));
+    field->addPrintPawn(Archer::archers.back());
+
+    ANSI::reset();
+    cursor.set(16, 10);
+    std::cout << "Under you there is an archer!";
+    cursor.set(17, 10);
+    std::cout << "Choose among 'i', 'j', 'k', 'l' the right direction to shoot the egg" << std::endl;
+
+    while (input != 'i' && input != 'j' && input != 'k' && input != 'l') {
+        #if defined(_WIN32) or defined(__linux__)
+            input = getch();
+        #elif __APPLE__
+            input = getchar();
+        #endif
+    }
+    act(input);
+    std::flush(std::cout);
+
+    // We have to move the bullet until it hits the archer
+    while (Bullet::bullets.size() > 0) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+        Bullet* bullet = Bullet::bullets[0];
+        bullet->move();
+        std::flush(std::cout);
+    }
+
+    ANSI::reset();
+    cursor.set(19, 10);
+    std::cout << "You have thrown an egg, now ";
+    ANSI::setAttribute(ANSI::Attribute::BRIGHT);
+    std::cout << "Collect the wall";
+    ANSI::reset();
+    std::cout << " '";
+    Wall::wallStyle.apply();
+    std::cout << "#";
+    ANSI::reset();
+    std::cout << "' like you did with the egg" << std::endl;
+
+    // Add a wall 5 blocks away from the player
+    sista::Coordinates wallCoords = Player::player->getCoordinates();
+    wallCoords.x -= 3;
+    Wall::walls.push_back(new Wall(wallCoords, 3));
+    field->addPrintPawn(Wall::walls.back());
+    std::flush(std::cout);
+
+    input = '_';
+    while (true) {
+        #if defined(_WIN32) or defined(__linux__)
+            input = getch();
+        #elif __APPLE__
+            input = getchar();
+        #endif
+        act(input);
+        std::flush(std::cout);
+        if (Player::player->inventory.walls > 0) {
+            break;
+        }
+    }
+    printSideInstructions(0, DAY_DURATION, NIGHT_DURATION);
+
+    ANSI::reset();
+    cursor.set(21, 10);
+    std::cout << "Wall collected, now press '#' or '=' to enter wall mode" << std::endl;
+    input = '_';
+    while (input != '#' && input != '=' && input != '0') {
+        #if defined(_WIN32) or defined(__linux__)
+            input = getch();
+        #elif __APPLE__
+            input = getchar();
+        #endif
+    }
+    Player::player->mode = Player::Mode::WALL;
+    std::flush(std::cout);
+
+    ANSI::reset();
+    cursor.set(22, 10);
+    std::cout << "Choose among 'i', 'j', 'k', 'l' a random direction to build a wall" << std::endl;
+
+    input = '_';
+    while (input != 'i' && input != 'j' && input != 'k' && input != 'l') {
+        #if defined(_WIN32) or defined(__linux__)
+            input = getch();
+        #elif __APPLE__
+            input = getchar();
+        #endif
+    }
+    act(input);
+    std::flush(std::cout);
+
+    ANSI::reset();
+    cursor.set(24, 10);
+    std::cout << "Now you have the basic knowledge to survive in the world of Inomhus" << std::endl;
+    cursor.set(25, 10);
+    std::cout << "For more tricks and tips, visit the GitHub repository" << std::endl;
+    cursor.set(26, 10);
+    std::cout << "https://github.com/FLAK-ZOSO/Inomhus" << std::endl;
+    cursor.set(28, 10);
+    std::cout << "Press any key to start the game" << std::endl;
+
+    #if defined(_WIN32) or defined(__linux__)
+        getch();
+    #elif __APPLE__
+        getchar();
+    #endif
 }
 
 void input() {
@@ -617,17 +793,12 @@ void printIntro() {
     std::cout << "\t- '\x1b[35mh\x1b[0m' or '\x1b[35mH\x1b[0m' to enter egg-hatching mode\n";
     std::cout << "\t- '\x1b[35mQ\x1b[0m' to quit\n\n";
 
-    std::cout << "\tMake sure to have the terminal full-screen\n\n";
+    std::cout << "\tMake sure to have the terminal full-screen\n";
+    std::cout << "\t\t'\x1b[35mn\x1b[0m' to skip the tutorial\n\n";
 
     ANSI::setAttribute(ANSI::Attribute::BLINK);
     std::cout << "\t\t\x1b[3mPress any key to start\x1b[0m";
     std::flush(std::cout);
-    #if defined(_WIN32) or defined(__linux__)
-        getch();
-    #elif __APPLE__
-        getchar();
-    #endif
-    sista::clearScreen();
 }
 
 void printSideInstructions(int i, int dayCountdown, int nightCountdown) {

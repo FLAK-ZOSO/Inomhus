@@ -87,6 +87,8 @@ inomhus.exe
 
 If it doesn't seem to work and you just downloaded the executable, you may need to give it the right permissions or simply compile it from source as explained above.
 
+If you don't want the tutorial to be played, just enter 'n' as explained in the intro screen; you shouldn't skip it the first time (also you can replay it for the sake of dismantling the instructions which are part of the field!).
+
 Use a proper zoom, read the controls and enjoy the game.
 
 ## Controls
