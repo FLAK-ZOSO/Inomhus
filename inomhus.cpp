@@ -1622,11 +1622,12 @@ void Walker::move() {
             mine->triggered = true;
         } else if (entity->type == Type::WEASEL) {
             // The weasel is scared and runs away
+            Weasel* weasel = (Weasel*)entity;
             for (int j=0; j<3; j++) {
-                sista::Coordinates nextCoordinates = coordinates + directionMap[(Direction)(rand() % 4)];
-                if (field->isFree(nextCoordinates)) {
-                    field->movePawn(this, nextCoordinates);
-                    coordinates = nextCoordinates;
+                sista::Coordinates nextCoordinates_ = weasel->getCoordinates() + directionMap[(Direction)(rand() % 4)];
+                if (field->isFree(nextCoordinates_)) {
+                    field->movePawn(this, nextCoordinates_);
+                    weasel->setCoordinates(nextCoordinates_);
                     return;
                 }
             }
@@ -1641,12 +1642,13 @@ void Walker::move() {
             // The walker can't pass through the gate and the trap is too small to be triggered
         } else if (entity->type == Type::CHICKEN) {
             // The chicken is scared and moves randomly
+            Chicken* chicken = (Chicken*)entity;
             for (int j=0; j<3; j++) {
-                sista::Coordinates nextCoordinates = coordinates + directionMap[(Direction)(rand() % 4)];
-                if (field->isFree(nextCoordinates)) {
-                    field->movePawn(this, nextCoordinates);
-                    coordinates = nextCoordinates;
-                    return;
+                sista::Coordinates nextCoordinates_ = chicken->getCoordinates() + directionMap[(Direction)(rand() % 4)];
+                if (field->isFree(nextCoordinates_)) {
+                    field->movePawn(chicken, nextCoordinates_);
+                    chicken->setCoordinates(nextCoordinates_);
+                    break;
                 }
             }
             // So if the chicken moved out of the way, the walker can move
@@ -1705,11 +1707,12 @@ void Archer::move() {
             // The archer can't pass through the gate and the trap is too small to be triggered
         } else if (entity->type == Type::WEASEL) {
             // The weasel is scared and runs away
+            Weasel* weasel = (Weasel*)entity;
             for (int j=0; j<3; j++) {
-                sista::Coordinates nextCoordinates = coordinates + directionMap[(Direction)(rand() % 4)];
-                if (field->isFree(nextCoordinates)) {
-                    field->movePawn(this, nextCoordinates);
-                    coordinates = nextCoordinates;
+                sista::Coordinates nextCoordinates_ = weasel->getCoordinates() + directionMap[(Direction)(rand() % 4)];
+                if (field->isFree(nextCoordinates_)) {
+                    field->movePawn(this, nextCoordinates_);
+                    weasel->setCoordinates(nextCoordinates_);
                     return;
                 }
             }
@@ -1719,11 +1722,12 @@ void Archer::move() {
             }
         } else if (entity->type == Type::SNAKE) {
             // The snake is scared and moves randomly
+            Snake* snake = (Snake*)entity;
             for (int j=0; j<3; j++) {
-                sista::Coordinates nextCoordinates = coordinates + directionMap[(Direction)(rand() % 4)];
-                if (field->isFree(nextCoordinates)) {
-                    field->movePawn(this, nextCoordinates);
-                    coordinates = nextCoordinates;
+                sista::Coordinates nextCoordinates_ = snake->getCoordinates() + directionMap[(Direction)(rand() % 4)];
+                if (field->isFree(nextCoordinates_)) {
+                    field->movePawn(this, nextCoordinates_);
+                    snake->setCoordinates(nextCoordinates_);
                     return;
                 }
             }
@@ -1733,11 +1737,12 @@ void Archer::move() {
             }
         } else if (entity->type == Type::CHICKEN) {
             // The chicken is scared and moves randomly
+            Chicken* chicken = (Chicken*)entity;
             for (int j=0; j<3; j++) {
-                sista::Coordinates nextCoordinates = coordinates + directionMap[(Direction)(rand() % 4)];
-                if (field->isFree(nextCoordinates)) {
-                    field->movePawn(this, nextCoordinates);
-                    coordinates = nextCoordinates;
+                sista::Coordinates nextCoordinates_ = chicken->getCoordinates() + directionMap[(Direction)(rand() % 4)];
+                if (field->isFree(nextCoordinates_)) {
+                    field->movePawn(chicken, nextCoordinates_);
+                    chicken->setCoordinates(nextCoordinates_);
                     return;
                 }
             }
