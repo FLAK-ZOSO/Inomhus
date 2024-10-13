@@ -271,6 +271,7 @@ public:
 void input();
 void act(char);
 void printIntro();
+void tutorial();
 void printSideInstructions(int, int, int);
 void deallocateMemory();
 void populate(sista::SwappableField*);

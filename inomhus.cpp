@@ -15,6 +15,7 @@
 #define VERSION "BETA"
 #define DATE "2024-10-13"
 
+#define REPOPULATE 0
 #define DEBUG 0
 #if DEBUG
     std::ofstream debug("debug.log");
@@ -79,6 +80,7 @@ sista::Border border(
     }
 );
 std::mutex streamMutex;
+bool tutorial_ = true;
 bool speedup = false;
 bool pause_ = false;
 bool end = false;
@@ -94,12 +96,24 @@ int main(int argc, char** argv) {
     ANSI::reset(); // Reset the settings
     srand(time(0)); // Seed the random number generator
 
+    if (argc > 1) {
+        for (int i=1; i<argc; i++) {
+            if (strcmp(argv[i], "--no-tutorial") == 0 || strcmp(argv[i], "-n") == 0) {
+                tutorial_ = false;
+            }
+        }
+    }
 
     sista::SwappableField field_(WIDTH, HEIGHT);
     field = &field_;
     field->clear();
     printIntro();
     field->addPrintPawn(Player::player = new Player({0, 0}));
+
+    if (tutorial_) {
+        tutorial();
+    }
+
     populate(field);
     sista::clearScreen();
     field->print(border);
@@ -326,10 +340,12 @@ int main(int argc, char** argv) {
             }
         }
 
+        #if REPOPULATE
         if (i % 128 == 127) {
             // repopulate the field from scratch for preventing nullptr pawns from laying around
             repopulate(field);
         }
+        #endif
         #if __linux__
         if (i % 10 == 9) {
         #elif __APPLE__ or _WIN32
@@ -366,6 +382,96 @@ int main(int argc, char** argv) {
         // system("stty -raw echo");
         tcsetattr(0, TCSANOW, &orig_termios);
     #endif
+}
+
+void tutorial() {
+    /*
+    Your character is represented by the `$` symbol and is happy to live in a 2D grid world; there are chickens (`%`) laying eggs (`0`) that the you can eat, chests (`C`) that may contain bricks and food, and comfortable walls (`#`) that can be used to build a house.
+    However the world is not as friendly as it may seem at daylight, there are snakes (`~`) that eat the precious eggs, weasels (`}`) that hunt the chickens, threatening blind zombies (`Z`) that will follow you around and that you should better not bump, archers (`A`) that will shoot you from a distance.
+    But, as it often happens in life, the worst enemy is yourself: when the night comes the character goes **out of control** and as a player you cannot control your character anymore, you can only watch it move around, destroy its own inventory and put itself in real danger.
+    Will you be able to build a house before the night comes? When it happens all the gates (`=`) will be closed and your fury will be unleashed.
+    */
+
+    sista::clearScreen();
+    field->print(border);
+    ANSI::reset();
+    cursor.set(3, 10);
+    std::cout << "Tutorial\n";
+    cursor.set(4, 10);
+    std::cout << "Your character is represented by the '";
+    Player::playerStyle.apply();
+    std::cout << "$";
+    ANSI::reset();
+    std::cout << "' symbol" << std::endl;
+
+    #if __linux__ or _WIN32
+        getch();
+    #elif __APPLE__
+        getchar();
+    #endif
+
+    Chicken::chickens.push_back(new Chicken({3, 5}));
+    field->addPrintPawn(Chicken::chickens.back());
+    ANSI::reset();
+    cursor.set(7, 10);
+    std::cout << "Chickens are represented by the '";
+    Chicken::chickenStyle.apply();
+    std::cout << "%";
+    ANSI::reset();
+    std::cout << "' symbol and lay eggs, represented by the '";
+    Egg::eggStyle.apply();
+    std::cout << "0";
+    ANSI::reset();
+    std::cout << "' symbol" << std::endl;
+
+    #if __linux__ or _WIN32
+        getch();
+    #elif __APPLE__
+        getchar();
+    #endif
+
+    Egg::eggs.push_back(new Egg({4, 5}));
+    field->addPrintPawn(Egg::eggs.back());
+    ANSI::reset();
+    cursor.set(8, 10);
+    std::cout << "You can collect eggs by being in a neighboring cell" << std::endl;
+    ANSI::setAttribute(ANSI::Attribute::BRIGHT);
+    cursor.set(9, 10);
+    std::cout << "Navigate to the egg with the 'w', 'a', 's', 'd' keys" << std::endl;
+
+    while (true) {
+        // Check if the player is in a neighboring cell to the egg
+        int distance_y = abs(Player::player->getCoordinates().y - Egg::eggs.back()->getCoordinates().y);
+        int distance_x = abs(Player::player->getCoordinates().x - Egg::eggs.back()->getCoordinates().x);
+        if (distance_y <= 0 && distance_x <= 0) {
+            break;
+        }
+        // Take input and move the player
+        char input = '_';
+        while (input != 'w' && input != 'a' && input != 's' && input != 'd') {
+            #if defined(_WIN32) or defined(__linux__)
+                input = getch();
+            #elif __APPLE__
+                input = getchar();
+            #endif
+        }
+        act(input);
+        std::flush(std::cout);
+    }
+
+    ANSI::reset();
+    cursor.set(10, 10);
+    std::cout << "You are next to the egg, now press 'c' to enter collect mode" << std::endl;
+    char input = '_';
+    while (input != 'c' && input != 'C') {
+        #if defined(_WIN32) or defined(__linux__)
+            input = getch();
+        #elif __APPLE__
+            input = getchar();
+        #endif
+    }
+
+    ANSI::reset();
 }
 
 void input() {
