@@ -24,6 +24,37 @@ cd Inomhus
 make
 ```
 
+If you compile the game from source you will be able to customize the game.
+
+```c
+#define DAY_DURATION 700
+#define NIGHT_DURATION 200
+
+#define WIDTH 70
+#define HEIGHT 30
+```
+
+These are some of the constants that you can change in the `inomhus.cpp` file.
+
+```c
+std::bernoulli_distribution Egg::hatchingDistribution(0.26); // 26%
+std::bernoulli_distribution eggSelfHatchingDistribution(0.001); // 0.1%
+std::bernoulli_distribution Chicken::eggDistribution(0.0075); // 0.75%
+std::bernoulli_distribution Chicken::movingDistribution(0.75); // 75%
+std::bernoulli_distribution Archer::movingDistribution(0.25); // 25%
+std::bernoulli_distribution Archer::shootDistribution(0.005); // 0.5%
+std::bernoulli_distribution Walker::movingDistribution(0.30); // 30%
+
+std::bernoulli_distribution walkerSpawnDistribution(0.003); // 0.3%
+std::bernoulli_distribution archerSpawnDistribution(0.004); // 0.4%
+std::bernoulli_distribution weaselSpawnDistribution(0.01); // 1%
+std::bernoulli_distribution snakeSpawnDistribution(0.01); // 1%
+std::bernoulli_distribution wallSpawnDistribution(0.01); // 1%
+```
+
+Having access to the source code you can also change the probabilities of the events that happen in the game, like the spawn of the enemies or the hatching of the eggs.
+
+
 ### From binary
 
 Go to the [repository](https://github.com/FLAK-ZOSO/Inomhus) page and download the executable for your system.
@@ -82,6 +113,22 @@ Game controls.
 - `Q` - Quit
 - `p`/`P`/`.` - Pause
 - `+`/`-` - Speed up/down
+
+## Gameplay
+
+Start the game by moving around and collecting eggs, chests, and bricks by using the keys `i`, `j`, `k`, and `l` when in `C`ollect mode.
+
+![alt text](inventory.png)
+
+As shown in the screenshot, you can see the status of your inventory and the time of the day in the top right corner.
+
+Using the same `i`, `j`, `k`, and `l` keys you can also shoot in the direction you want, but be careful, you have a limited amount of eggs to throw and you may want to hatch them instead.
+
+When you have enough bricks you can build a house with the same directional keys in build wall mode (entered by pressing `0`, `=` or `#`), and you can place a gate within a wall in build gate mode (entered by pressing `g` or `G`).
+
+In order to protect the chickens and their eggs you may want to build traps (build trap mode can be entered with `t` or `T`) that will catch the weasels and the snakes; you can also place mines (mine mode can be entered with `m`) that will explode when an enemy passes nearby.
+
+When the night comes you will lose control of your character and you will have to watch it destroy its inventory and put itself in danger, so be sure to build a house, secure your inventory in a chest (that can be dropped in dump chest mode, accessible by key `e` or `E`).
 
 ## Credits
 

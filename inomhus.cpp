@@ -6,14 +6,14 @@
 #include <chrono>
 #include <mutex>
 
-#define DAY_DURATION 500
+#define DAY_DURATION 700
 #define NIGHT_DURATION 200
 
 #define WIDTH 70
 #define HEIGHT 30
 
 #define VERSION "BETA"
-#define DATE "2024-10-12"
+#define DATE "2024-10-13"
 
 Player* Player::player;
 std::vector<Walker*> Walker::walkers;
@@ -332,69 +332,20 @@ int main(int argc, char** argv) {
             // reprint the field every 10 frames
             sista::clearScreen();
             field->print(border);
-            printSideInstructions();
         }
         // Spawn new entities
         spawnNew(field);
 
-        // Print the inventory
-        ANSI::reset();
-        cursor.set(10, 80);
-        ANSI::setAttribute(ANSI::Attribute::BRIGHT);
-        std::cout << "Inventory\n";
-        ANSI::resetAttribute(ANSI::Attribute::BRIGHT);
-        cursor.set(11, 80);
-        std::cout << "Walls: " << Player::player->inventory.walls << "   \n";
-        cursor.set(12, 80);
-        std::cout << "Eggs: " << Player::player->inventory.eggs << "   \n";
-        cursor.set(13, 80);
-        std::cout << "Meat: " << Player::player->inventory.meat << "   \n";
-        cursor.set(14, 80);
-        std::cout << "Mode: ";
-        switch (Player::player->mode) {
-            case Player::Mode::COLLECT:
-                std::cout << "Collect";
-                break;
-            case Player::Mode::BULLET:
-                std::cout << "Bullet";
-                break;
-            case Player::Mode::DUMPCHEST:
-                std::cout << "Dump chest";
-                break;
-            case Player::Mode::WALL:
-                std::cout << "Wall";
-                break;
-            case Player::Mode::GATE:
-                std::cout << "Gate";
-                break;
-            case Player::Mode::TRAP:
-                std::cout << "Trap";
-                break;
-            case Player::Mode::MINE:
-                std::cout << "Mine";
-                break;
-            case Player::Mode::HATCH:
-                std::cout << "Hatch";
-                break;
-        }
-        std::cout << "      ";
-        cursor.set(18, 80);
-        ANSI::setAttribute(ANSI::Attribute::BRIGHT);
-        std::cout << "Time survived: " << i << "    \n";
-        ANSI::resetAttribute(ANSI::Attribute::BRIGHT);
-        cursor.set(20, 80);
-        ANSI::setAttribute(ANSI::Attribute::BRIGHT);
-        std::cout << "Time before ";
-        if (day) {
-            std::cout << "night: " << nightCountdown << "    \n";
-        } else {
-            std::cout << "day: " << dayCountdown << "    \n";
-        }
-        ANSI::resetAttribute(ANSI::Attribute::BRIGHT);
+        // Print inventory, time and instructions
+        printSideInstructions(i, dayCountdown, nightCountdown);
         std::flush(std::cout);
     }
 
+    // Deallocate memory
+    deallocateMemory();
     th.join();
+    delete Player::player;
+    field->clear();
     cursor.set(72, 0); // Move the cursor to the bottom of the screen, so the terminal is not left in a weird state
     #if __linux__
         getch();
@@ -565,9 +516,99 @@ void printIntro() {
     sista::clearScreen();
 }
 
-void printSideInstructions() {
+void printSideInstructions(int i, int dayCountdown, int nightCountdown) {
+    // Print the inventory
+    ANSI::reset();
+    cursor.set(3, 80);
+    ANSI::setAttribute(ANSI::Attribute::BRIGHT);
+    std::cout << "Inventory\n";
+    ANSI::resetAttribute(ANSI::Attribute::BRIGHT);
+    cursor.set(4, 80);
+    std::cout << "Walls: " << Player::player->inventory.walls << "   \n";
+    cursor.set(5, 80);
+    std::cout << "Eggs: " << Player::player->inventory.eggs << "   \n";
+    cursor.set(6, 80);
+    std::cout << "Meat: " << Player::player->inventory.meat << "   \n";
+    cursor.set(7, 80);
+    std::cout << "Mode: ";
+    switch (Player::player->mode) {
+        case Player::Mode::COLLECT:
+            std::cout << "Collect";
+            break;
+        case Player::Mode::BULLET:
+            std::cout << "Bullet";
+            break;
+        case Player::Mode::DUMPCHEST:
+            std::cout << "Dump chest";
+            break;
+        case Player::Mode::WALL:
+            std::cout << "Wall";
+            break;
+        case Player::Mode::GATE:
+            std::cout << "Gate";
+            break;
+        case Player::Mode::TRAP:
+            std::cout << "Trap";
+            break;
+        case Player::Mode::MINE:
+            std::cout << "Mine";
+            break;
+        case Player::Mode::HATCH:
+            std::cout << "Hatch";
+            break;
+    }
+    std::cout << "      ";
+    cursor.set(10, 80);
+    ANSI::setAttribute(ANSI::Attribute::BRIGHT);
+    std::cout << "Time survived: " << i << "    \n";
+    ANSI::resetAttribute(ANSI::Attribute::BRIGHT);
+    cursor.set(11, 80);
+    ANSI::setAttribute(ANSI::Attribute::BRIGHT);
+    std::cout << "Time before ";
+    if (day) {
+        std::cout << "night: " << nightCountdown << "    \n";
+    } else {
+        std::cout << "day: " << dayCountdown << "    \n";
+    }
+    ANSI::resetAttribute(ANSI::Attribute::BRIGHT);
     // Be aware not to overwrite the inventory and the time survived which use {10, 80} to ~{18, 80}
     cursor.set(20, 80);
+}
+
+void deallocateMemory() {
+    for (auto wall : Wall::walls) {
+        delete wall;
+    }
+    for (auto chest : Chest::chests) {
+        delete chest;
+    }
+    for (auto mine : Mine::mines) {
+        delete mine;
+    }
+    for (auto trap : Trap::traps) {
+        delete trap;
+    }
+    for (auto gate : Gate::gates) {
+        delete gate;
+    }
+    for (auto weasel : Weasel::weasels) {
+        delete weasel;
+    }
+    for (auto snake : Snake::snakes) {
+        delete snake;
+    }
+    for (auto chicken : Chicken::chickens) {
+        delete chicken;
+    }
+    for (auto egg : Egg::eggs) {
+        delete egg;
+    }
+    for (auto bullet : Bullet::bullets) {
+        delete bullet;
+    }
+    for (auto enemyBullet : EnemyBullet::enemyBullets) {
+        delete enemyBullet;
+    }
 }
 
 void populate(sista::SwappableField* field) {
