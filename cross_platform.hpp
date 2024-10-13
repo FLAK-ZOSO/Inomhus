@@ -12,6 +12,7 @@
     }
 #elif __APPLE__
     #include <termios.h>
+    #include <unistd.h>
 
     struct termios orig_termios;
     void term_echooff() {
