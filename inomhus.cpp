@@ -207,9 +207,9 @@ int main(int argc, char** argv) {
                 }
             }
         }
-        for (auto coord : coordinates) {
-            field->removePawn(field->getPawn(coord));
-        }
+        // for (auto coord : coordinates) {
+        //     field->removePawn(field->getPawn(coord));
+        // }
         std::lock_guard<std::mutex> lock(streamMutex);
         for (unsigned j=0; j<Bullet::bullets.size(); j++) {
             if (j >= Bullet::bullets.size()) break;
@@ -597,12 +597,13 @@ void tutorial() {
             input = getchar();
         #endif
         act(input);
+        printSideInstructions(0, DAY_DURATION, NIGHT_DURATION);
         std::flush(std::cout);
         if (Player::player->inventory.walls > 0) {
             break;
         }
     }
-    printSideInstructions(0, DAY_DURATION, NIGHT_DURATION);
+    std::flush(std::cout);
 
     ANSI::reset();
     cursor.set(21, 10);
@@ -616,6 +617,7 @@ void tutorial() {
         #endif
     }
     Player::player->mode = Player::Mode::WALL;
+    printSideInstructions(0, DAY_DURATION, NIGHT_DURATION);
     std::flush(std::cout);
 
     ANSI::reset();
@@ -1714,6 +1716,7 @@ void Snake::move() {
             Weasel::removeWeasel((Weasel*)entity);
         } else if (entity->type == Type::SNAKE) {
             Snake::removeSnake((Snake*)entity);
+            return;
         } else if (entity->type == Type::GATE) {
             if (day) { // Or maybe the snake should be able to sneak through the closed gate
                 // passing through the gate
