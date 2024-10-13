@@ -15,6 +15,11 @@
 #define VERSION "BETA"
 #define DATE "2024-10-13"
 
+#define DEBUG 0
+#if DEBUG
+    std::ofstream debug("debug.log");
+#endif
+
 Player* Player::player;
 std::vector<Walker*> Walker::walkers;
 std::vector<Archer*> Archer::archers;
@@ -172,14 +177,14 @@ int main(int argc, char** argv) {
                     pawn != Player::player) {
                     coordinates.push_back(pawn->getCoordinates());
                     #if DEBUG
-                    debug << "Erasing " << pawn << " at " << pawn->getCoordinates() << std::endl;
+                    debug << "Erasing " << pawn << " at {" << j << ", " << i << "}" << std::endl;
                     debug << "\t" << typeid(*pawn).name() << std::endl;
                     #endif
                 }
             }
         }
         for (auto coord : coordinates) {
-            field->erasePawn(coord);
+            field->removePawn(field->getPawn(coord));
         }
         std::lock_guard<std::mutex> lock(streamMutex);
         for (unsigned j=0; j<Bullet::bullets.size(); j++) {
@@ -252,8 +257,9 @@ int main(int argc, char** argv) {
             if (egg == nullptr) continue;
             if (eggSelfHatchingDistribution(rng)) {
                 if (Egg::hatchingDistribution(rng)) {
+                    sista::Coordinates coords = egg->getCoordinates();
                     Egg::removeEgg(egg);
-                    Chicken::chickens.push_back(new Chicken(egg->getCoordinates()));
+                    Chicken::chickens.push_back(new Chicken(coords));
                     field->addPrintPawn(Chicken::chickens.back());
                 } else {
                     Egg::removeEgg(egg);
