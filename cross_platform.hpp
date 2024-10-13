@@ -24,6 +24,11 @@
 
         tcsetattr(0, TCSANOW, &noecho);
     }
+
+    void flushInput() {
+        // Flush stdin (discard data not read yet)
+        tcflush(STDIN_FILENO, TCIFLUSH);
+    }
 #elif __linux__    
     #include <unistd.h>
     #include <termios.h>
