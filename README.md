@@ -148,4 +148,7 @@ When the night comes you will lose control of your character and you will have t
 - Stefano Tocazzo for the trailer
 - NIVIRO for the [trailer's soundtrack](https://ncs.io/TheRiot)
 - [BeautifulSara3137](https://github.com/BeautifulSara3137) for the MacOS testing and executables
-- ITÜK for the [event](https://gamecamp.ituk.ee/event/08dcca81-1c54-47d0-8eda-151aa7b1e956)
+- ITÜK for the [event](https://gamecamp.ituk.ee/event/08dcca81-1c54-47d0-8eda-151aa7b1e956) in which Inomhus qualified 21st
+
+![image](https://github.com/user-attachments/assets/eeaffe2c-0c5d-4d5e-a665-6383e30d3a96)
+
