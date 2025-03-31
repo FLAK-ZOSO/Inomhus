@@ -1147,12 +1147,13 @@ void Player::move(Direction direction) {
         } else if (entity->type == Type::EGG) {
             Egg::removeEgg((Egg*)entity);
         } else if (entity->type == Type::CHICKEN) {
-            inventory.meat++;
+            inventory.meat += 2;
             Chicken::removeChicken((Chicken*)entity);
         } else if (entity->type == Type::WEASEL) {
-            inventory.meat++;
+            inventory.meat += 2;
             Weasel::removeWeasel((Weasel*)entity);
         } else if (entity->type == Type::SNAKE) {
+            inventory.meat++;
             Snake::removeSnake((Snake*)entity);
         } else if (entity->type == Type::GATE) {
             if (day) {
@@ -1307,9 +1308,9 @@ void Player::shoot(Direction direction) {
                 field->addPrintPawn(Gate::gates.back());
             }
         } else if (mode == Mode::TRAP) {
-            if (inventory.walls > 0 && inventory.eggs > 0) {
+            if (inventory.walls > 0 && inventory.meat > 0) {
                 inventory.walls--;
-                inventory.eggs--;
+                inventory.meat--;
                 Trap::traps.push_back(new Trap(targetCoordinates));
                 field->addPrintPawn(Trap::traps.back());
             }
