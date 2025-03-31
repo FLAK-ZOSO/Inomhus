@@ -339,7 +339,7 @@ int main(int argc, char** argv) {
                 Weasel::removeWeasel(weasel);
             } else if (weasel->caught) {
                 Weasel::removeWeasel(weasel);
-                Player::player->inventory.meat++;
+                Player::player->inventory.meat += 2;
             }
         }
         for (unsigned s=0; s<Snake::snakes.size(); s++) {
@@ -1714,7 +1714,7 @@ void Snake::move() {
             Mine* mine = (Mine*)entity;
             mine->triggered = true;
         } else if (entity->type == Type::TRAP) {
-            Trap::removeTrap((Trap*)entity);
+            // Will just change direction, because traps are only meant for Weasels so far
         } else if (entity->type == Type::WEASEL) {
             Weasel::removeWeasel((Weasel*)entity);
         } else if (entity->type == Type::SNAKE) {
