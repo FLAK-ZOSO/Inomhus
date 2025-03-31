@@ -31,15 +31,15 @@ This is where the walls, to control the movement of the Player, and the chests, 
 
 - Gate: 2 WALL + 1 EGG
 - Wall: 1 WALL
-- Trap: 1 WALL + 1 EGG
+- Trap: 1 WALL + 1 MEAT
 - Mine: 1 WALL + 3 EGG
 
 ```c++
 enum Type {
-    PLAYER,
-    BULLET,
+    PLAYER, // $
+    BULLET, // < ^ v >
     WALL, // #
-    GATE, // G, only open during the day
+    GATE, // =, only open during the day
     CHEST, // C, can be collected by the player
     TRAP, // T, will act when stepped on
     MINE, // *, will be triggered when passing by
@@ -56,3 +56,11 @@ enum Type {
     EGG, // 0, will hatch into a chicken
 };
 ```
+
+### Meat
+
+- Meat is obtained from eating a snake or a weasel
+
+But what can we do with meat? Apart from preventing a zombie from breaking your chest, which is a rather marginal use.
+
+- Meat can be used to craft a trap
