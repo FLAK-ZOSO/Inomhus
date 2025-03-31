@@ -1147,12 +1147,13 @@ void Player::move(Direction direction) {
         } else if (entity->type == Type::EGG) {
             Egg::removeEgg((Egg*)entity);
         } else if (entity->type == Type::CHICKEN) {
-            inventory.meat++;
+            inventory.meat += 2;
             Chicken::removeChicken((Chicken*)entity);
         } else if (entity->type == Type::WEASEL) {
-            inventory.meat++;
+            inventory.meat += 2;
             Weasel::removeWeasel((Weasel*)entity);
         } else if (entity->type == Type::SNAKE) {
+            inventory.meat++;
             Snake::removeSnake((Snake*)entity);
         } else if (entity->type == Type::GATE) {
             if (day) {
