@@ -1307,9 +1307,9 @@ void Player::shoot(Direction direction) {
                 field->addPrintPawn(Gate::gates.back());
             }
         } else if (mode == Mode::TRAP) {
-            if (inventory.walls > 0 && inventory.eggs > 0) {
+            if (inventory.walls > 0 && inventory.meat > 0) {
                 inventory.walls--;
-                inventory.eggs--;
+                inventory.meat--;
                 Trap::traps.push_back(new Trap(targetCoordinates));
                 field->addPrintPawn(Trap::traps.back());
             }
