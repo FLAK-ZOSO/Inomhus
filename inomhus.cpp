@@ -1126,8 +1126,8 @@ ANSI::Settings nightPlayerStyle = {
     ANSI::BackgroundColor::B_BLACK,
     ANSI::Attribute::REVERSE
 };
-Player::Player(sista::Coordinates coordinates) : Entity('$', coordinates, playerStyle, Type::PLAYER), mode(Player::Mode::COLLECT), inventory({0, 0}) {}
-Player::Player() : Entity('$', {0, 0}, playerStyle, Type::PLAYER), mode(Player::Mode::COLLECT), inventory({0, 0}) {}
+Player::Player(sista::Coordinates coordinates) : Entity('$', coordinates, playerStyle, Type::PLAYER), mode(Player::Mode::COLLECT), inventory({0, 0, 0}) {}
+Player::Player() : Entity('$', {0, 0}, playerStyle, Type::PLAYER), mode(Player::Mode::COLLECT), inventory({0, 0, 0}) {}
 void Player::move(Direction direction) {
     sista::Coordinates nextCoordinates = coordinates + directionMap[direction];
     if (field->isOutOfBounds(nextCoordinates)) {
