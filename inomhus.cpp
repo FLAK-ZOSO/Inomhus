@@ -133,10 +133,9 @@ int main(int argc, char** argv) {
     int dayCountdown = NIGHT_DURATION;
     int nightCountdown = DAY_DURATION;
     for (int i=0; !end; i++) {
-        if (pause_) {
-            while (pause_) {
-                std::this_thread::sleep_for(std::chrono::milliseconds(10));
-            }
+        while (pause_) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            if (end) break;
         }
         if (speedup) {
             std::this_thread::sleep_for(std::chrono::milliseconds(25));
