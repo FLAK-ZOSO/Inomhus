@@ -73,6 +73,9 @@ Go to the [repository](https://github.com/FLAK-ZOSO/Inomhus) page and download t
 - [Windows](https://github.com/FLAK-ZOSO/Inomhus/blob/main/inomhus.exe)
 - [MacOS](https://github.com/FLAK-ZOSO/Inomhus/blob/main/inomhusApple)
 
+⚠️ - those executables are outdated as it is tedious to compile them on all targets for each release not having all those machines available
+⚠️ - the executables for MacOS are never completely statically compiled [for a known static linking problem](https://stackoverflow.com/questions/3801011/ld-library-not-found-for-lcrt0-o-on-osx-10-6-with-gcc-clang-static-flag/3801032#3801032)
+
 ## Usage
 
 Open your ANSI terminal - on Windows you should use Windows Terminal while on Linux and MacOS you can use the default terminal - and run the executable.
@@ -92,8 +95,6 @@ If you don't want the tutorial to be played, just enter 'n' as explained in the 
 Use a proper zoom, read the controls and enjoy the game.
 
 ## Controls
-
-⚠️ - on Apple systems you will have to press `enter` for sending commands, sadly
 
 Movement controls.
 
