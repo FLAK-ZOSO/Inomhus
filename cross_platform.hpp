@@ -21,7 +21,7 @@
         tcgetattr(0, &orig_termios);
 
         noecho = orig_termios;
-        noecho.c_lflag &= ~ECHO;
+        noecho.c_lflag &= ~(ECHO | ICANON);
 
         tcsetattr(0, TCSANOW, &noecho);
     }
