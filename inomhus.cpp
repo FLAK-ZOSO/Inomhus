@@ -13,8 +13,8 @@
 #define WIDTH 70
 #define HEIGHT 30
 
-#define VERSION "0.2.3"
-#define DATE "2025-06-28"
+#define VERSION "0.3.0"
+#define DATE "2025-07-06"
 
 #define REPOPULATE 0
 #define DEBUG 0
