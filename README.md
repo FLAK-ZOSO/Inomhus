@@ -29,13 +29,13 @@ make
 If you don't have `make` installed you can copy and paste the following commands in your terminal.
 
 ```bash
-g++ -std=c++17 -Wall -g -c -static include/sista/ANSI-Settings.cpp include/sista/border.cpp include/sista/coordinates.cpp include/sista/cursor.cpp include/sista/field.cpp include/sista/pawn.cpp
-g++ -std=c++17 -Wall -g -c -static inomhus.cpp -Wno-narrowing
-g++ -std=c++17 -Wall -g -static -o inomhus inomhus.o ANSI-Settings.o border.o coordinates.o cursor.o pawn.o field.o
+PREFIX=/usr/local
+g++ -std=c++17 -Wall -g -c -static inomhus.cpp -I$(PREFIX)/include -Wno-narrowing
+g++ -std=c++17 -Wall -g -static -o inomhus -L$(PREFIX)/lib inomhus.o -lpthread -lSista
 rm -f *.o
 ```
 
-If you compile the game from source you will be able to customize the game.
+If you compile the game from source you will be able to customize the game (_before_ compilation).
 
 ```c
 #define DAY_DURATION 700
