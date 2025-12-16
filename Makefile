@@ -19,6 +19,6 @@ else
 endif
 
 all:
-	g++ -std=c++17 -Wall -g $(STATIC_FLAG) -c inomhus.cpp $(INCLUDE_PATH_DIRECTIVE) -Wno-narrowing
+	g++ -std=c++17 -Wall -g $(STATIC_FLAG) -c inomhus.cpp $(INCLUDE_PATH_DIRECTIVE) -Wpedantic -Wno-narrowing
 	g++ -std=c++17 -Wall -g $(STATIC_FLAG) -o inomhus $(LD_LIBRARY_PATH_DIRECTIVE) $(WINMM_FLAG) inomhus.o -lpthread -lSista
 	rm -f *.o

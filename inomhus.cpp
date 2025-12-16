@@ -123,7 +123,7 @@ int main(int argc, char** argv) {
     if (tutorial_) {
         tutorial();
     } else {
-        field->addPrintPawn(Player::player = std::make_shared<Player>((sista::Coordinates){0, 0}));
+        field->addPrintPawn(Player::player = std::make_shared<Player>(sista::Coordinates{0, 0}));
     }
 
     populate(field);
@@ -158,7 +158,7 @@ int main(int argc, char** argv) {
             nightCountdown = DAY_DURATION;
             if (day) {
                 // The day is back, but the out-of-control player destroys the inventory
-                Player::player->inventory = (Inventory){0, 0, 0};
+                Player::player->inventory = Inventory{0, 0, 0};
                 Player::player->setSettings(Player::playerStyle);
                 border = sista::Border(
                     '@', {
@@ -453,7 +453,7 @@ void tutorial() {
 
     sista::clearScreen();
     field->print();
-    field->addPrintPawn(Player::player = std::make_shared<Player>((sista::Coordinates){0, 0}));
+    field->addPrintPawn(Player::player = std::make_shared<Player>(sista::Coordinates{0, 0}));
     sista::resetAnsi();
     cursor.goTo(3, 10);
     std::cout << "Tutorial\n";
@@ -470,7 +470,7 @@ void tutorial() {
         getchar();
     #endif
 
-    Chicken::chickens.push_back(std::make_shared<Chicken>((sista::Coordinates){3, 5}));
+    Chicken::chickens.push_back(std::make_shared<Chicken>(sista::Coordinates{3, 5}));
     field->addPrintPawn(Chicken::chickens.back());
     sista::resetAnsi();
     cursor.goTo(7, 10);
@@ -492,7 +492,7 @@ void tutorial() {
         getchar();
     #endif
 
-    Egg::eggs.push_back(std::make_shared<Egg>((sista::Coordinates){4, 5}));
+    Egg::eggs.push_back(std::make_shared<Egg>(sista::Coordinates{4, 5}));
     field->addPrintPawn(Egg::eggs.back());
     sista::resetAnsi();
     cursor.goTo(10, 10);
@@ -1009,7 +1009,7 @@ void populate(sista::SwappableField* field) {
     for (int i=0; i<3; i++) {
         coordinates = {rand() % HEIGHT, rand() % WIDTH};
         if (field->isFree(coordinates)) {
-            Chest::chests.push_back(std::make_shared<Chest>(coordinates, (Inventory){rand() % 5, rand() % 5}, true));
+            Chest::chests.push_back(std::make_shared<Chest>(coordinates, Inventory{(short)(rand() % 5), (short)(rand() % 5)}, true));
             field->addPrintPawn(Chest::chests.back());
         }
     }
