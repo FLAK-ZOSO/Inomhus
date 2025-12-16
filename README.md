@@ -20,8 +20,26 @@ Will you be able to build a house before the night comes? When it happens all th
 
 ### From source
 
+- Install dependencies (Sista)
+
+```bash
+git clone https://github.com/FLAK-ZOSO/Sista
+cd Sista
+sudo make install
+```
+
+- Compile the videogame (Inomhus)
+
 ```bash
 git clone https://github.com/FLAK-ZOSO/Inomhus
+cd Inomhus
+make
+```
+
+If you want the dependency Sista to be included directly in the videogame, you have to use an older version that you can clone and compile this way.
+
+```bash
+git clone --depth 1 --branch v0.3.0 https://github.com/FLAK-ZOSO/Inomhus
 cd Inomhus
 make
 ```
@@ -34,6 +52,8 @@ g++ -std=c++17 -Wall -g -c -static inomhus.cpp -I$(PREFIX)/include -Wno-narrowin
 g++ -std=c++17 -Wall -g -static -o inomhus -L$(PREFIX)/lib inomhus.o -lpthread -lSista
 rm -f *.o
 ```
+
+The compilation information for Windows is in `compile.bat` but it could be outdated, and it requires the GCC keychain installed somehow.
 
 If you compile the game from source you will be able to customize the game (_before_ compilation).
 
