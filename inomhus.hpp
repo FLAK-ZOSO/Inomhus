@@ -1,4 +1,4 @@
-#include "include/sista/sista.hpp"
+#include <sista/sista.hpp>
 #include <unordered_map>
 #include <vector>
 #include <random>
@@ -31,7 +31,7 @@ extern std::unordered_map<Direction, sista::Coordinates> directionMap;
 extern std::unordered_map<Direction, char> directionSymbol;
 extern std::mt19937 rng;
 
-extern ANSI::Settings nightPlayerStyle;
+extern sista::ANSISettings nightPlayerStyle;
 
 struct Inventory {
     short walls = 0;
@@ -47,14 +47,14 @@ public:
     Type type;
 
     Entity();
-    Entity(char, sista::Coordinates, ANSI::Settings&, Type);
+    Entity(char, sista::Coordinates, sista::ANSISettings&, Type);
 };
 
 
 class Player : public Entity {
 public:
-    static ANSI::Settings playerStyle;
-    static Player* player;
+    static sista::ANSISettings playerStyle;
+    static std::shared_ptr<Player> player;
     enum Mode {
         COLLECT, BULLET, DUMPCHEST,
         WALL, GATE, TRAP, MINE, HATCH
@@ -71,8 +71,8 @@ public:
 
 class Bullet : public Entity {
 public:
-    static ANSI::Settings bulletStyle;
-    static std::vector<Bullet*> bullets;
+    static sista::ANSISettings bulletStyle;
+    static std::vector<std::shared_ptr<Bullet>> bullets;
     Direction direction;
     unsigned short speed = 1; // The bullet moves speed cells per frame
     bool collided = false; // If the bullet was destroyed in a collision with an opposite bullet
@@ -89,8 +89,8 @@ public:
 
 class EnemyBullet : public Entity {
 public:
-    static ANSI::Settings enemyBulletStyle;
-    static std::vector<EnemyBullet*> enemyBullets;
+    static sista::ANSISettings enemyBulletStyle;
+    static std::vector<std::shared_ptr<EnemyBullet>> enemyBullets;
     Direction direction;
     unsigned short speed = 1; // The bullet moves speed cells per frame
     bool collided = false; // If the bullet was destroyed in a collision with an opposite bullet
@@ -107,8 +107,8 @@ public:
 
 class Wall : public Entity {
 public:
-    static ANSI::Settings wallStyle;
-    static std::vector<Wall*> walls;
+    static sista::ANSISettings wallStyle;
+    static std::vector<std::shared_ptr<Wall>> walls;
     short int strength; // The wall has a certain strength (when it reaches 0, the wall is destroyed)
 
     Wall();
@@ -120,8 +120,8 @@ public:
 
 class Mine : public Entity {
 public:
-    static ANSI::Settings mineStyle;
-    static std::vector<Mine*> mines;
+    static sista::ANSISettings mineStyle;
+    static std::vector<std::shared_ptr<Mine>> mines;
     bool triggered = false;
     bool alive = true;
 
@@ -138,8 +138,8 @@ public:
 
 class Chest : public Entity {
 public:
-    static ANSI::Settings chestStyle;
-    static std::vector<Chest*> chests;
+    static sista::ANSISettings chestStyle;
+    static std::vector<std::shared_ptr<Chest>> chests;
     Inventory inventory;
 
     Chest();
@@ -152,8 +152,8 @@ public:
 
 class Trap : public Entity {
 public:
-    static ANSI::Settings trapStyle;
-    static std::vector<Trap*> traps;
+    static sista::ANSISettings trapStyle;
+    static std::vector<std::shared_ptr<Trap>> traps;
 
     Trap();
     Trap(sista::Coordinates);
@@ -164,8 +164,8 @@ public:
 
 class Walker : public Entity {
 public:
-    static ANSI::Settings walkerStyle;
-    static std::vector<Walker*> walkers;
+    static sista::ANSISettings walkerStyle;
+    static std::vector<std::shared_ptr<Walker>> walkers;
     static std::bernoulli_distribution movingDistribution;
 
     Walker();
@@ -179,8 +179,8 @@ public:
 
 class Archer : public Entity {
 public:
-    static ANSI::Settings archerStyle;
-    static std::vector<Archer*> archers;
+    static sista::ANSISettings archerStyle;
+    static std::vector<std::shared_ptr<Archer>> archers;
     static std::bernoulli_distribution movingDistribution;
     static std::bernoulli_distribution shootDistribution;
 
@@ -196,8 +196,8 @@ public:
 
 class Chicken : public Entity {
 public:
-    static ANSI::Settings chickenStyle;
-    static std::vector<Chicken*> chickens;
+    static sista::ANSISettings chickenStyle;
+    static std::vector<std::shared_ptr<Chicken>> chickens;
     static std::bernoulli_distribution movingDistribution;
     static std::bernoulli_distribution eggDistribution;
 
@@ -212,8 +212,8 @@ public:
 
 class Egg : public Entity {
 public:
-    static ANSI::Settings eggStyle;
-    static std::vector<Egg*> eggs;
+    static sista::ANSISettings eggStyle;
+    static std::vector<std::shared_ptr<Egg>> eggs;
     static std::bernoulli_distribution hatchingDistribution;
 
     Egg();
@@ -225,8 +225,8 @@ public:
 
 class Weasel : public Entity {
 public:
-    static ANSI::Settings weaselStyle;
-    static std::vector<Weasel*> weasels;
+    static sista::ANSISettings weaselStyle;
+    static std::vector<std::shared_ptr<Weasel>> weasels;
     bool crossed = false; // If the weasel has reached the other side of the field and will be removed
     bool caught = false; // If the weasel was caught in a trap
     Direction direction;
@@ -242,8 +242,8 @@ public:
 
 class Snake : public Entity {
 public:
-    static ANSI::Settings snakeStyle;
-    static std::vector<Snake*> snakes;
+    static sista::ANSISettings snakeStyle;
+    static std::vector<std::shared_ptr<Snake>> snakes;
     bool crossed = false; // If the snake has reached the other side of the field and will be removed
     Direction direction;
 
@@ -258,8 +258,8 @@ public:
 
 class Gate : public Entity {
 public:
-    static ANSI::Settings gateStyle;
-    static std::vector<Gate*> gates;
+    static sista::ANSISettings gateStyle;
+    static std::vector<std::shared_ptr<Gate>> gates;
     // bool open = false; // Redundant, open at day, closed at night
 
     Gate();
@@ -277,4 +277,4 @@ void deallocateMemory();
 void populate(sista::SwappableField*);
 void repopulate(sista::SwappableField*);
 void spawnNew(sista::SwappableField*);
-void removeNullptrs(std::vector<Entity*>&);
+void removeNullptrs(std::vector<std::shared_ptr<Entity>>&);
