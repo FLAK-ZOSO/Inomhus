@@ -214,7 +214,7 @@ int main(int argc, char** argv) {
             }
         }
         // for (auto coord : coordinates) {
-        //     field->removePawn(field->getPawn(coord));
+        //     field->erasePawn(field->getPawn(coord));
         // }
         std::lock_guard<std::mutex> lock(streamMutex);
         for (unsigned j=0; j<Bullet::bullets.size(); j++) {
@@ -1391,7 +1391,7 @@ void Bullet::removeBullet(Bullet* bullet) {
     auto it = std::find_if(Bullet::bullets.begin(), Bullet::bullets.end(),
         [bullet](const std::shared_ptr<Bullet>& b) { return b.get() == bullet; });
     if (it != Bullet::bullets.end()) {
-        field->removePawn(bullet);
+        field->erasePawn(bullet);
         Bullet::bullets.erase(it);
     }
 }
@@ -1491,7 +1491,7 @@ void EnemyBullet::removeEnemyBullet(EnemyBullet* enemyBullet) {
     auto it = std::find_if(EnemyBullet::enemyBullets.begin(), EnemyBullet::enemyBullets.end(),
         [enemyBullet](const std::shared_ptr<EnemyBullet>& b) { return b.get() == enemyBullet; });
     if (it != EnemyBullet::enemyBullets.end()) {
-        field->removePawn(enemyBullet);
+        field->erasePawn(enemyBullet);
         EnemyBullet::enemyBullets.erase(it);
     }
 }
