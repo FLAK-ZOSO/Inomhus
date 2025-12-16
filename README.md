@@ -20,8 +20,26 @@ Will you be able to build a house before the night comes? When it happens all th
 
 ### From source
 
+- Install dependencies (Sista)
+
+```bash
+git clone https://github.com/FLAK-ZOSO/Sista
+cd Sista
+sudo make install
+```
+
+- Compile the videogame (Inomhus)
+
 ```bash
 git clone https://github.com/FLAK-ZOSO/Inomhus
+cd Inomhus
+make
+```
+
+If you want the dependency Sista to be included directly in the videogame, you have to use an older version that you can clone and compile this way.
+
+```bash
+git clone --depth 1 --branch v0.3.0 https://github.com/FLAK-ZOSO/Inomhus
 cd Inomhus
 make
 ```
@@ -29,13 +47,15 @@ make
 If you don't have `make` installed you can copy and paste the following commands in your terminal.
 
 ```bash
-g++ -std=c++17 -Wall -g -c -static include/sista/ANSI-Settings.cpp include/sista/border.cpp include/sista/coordinates.cpp include/sista/cursor.cpp include/sista/field.cpp include/sista/pawn.cpp
-g++ -std=c++17 -Wall -g -c -static inomhus.cpp -Wno-narrowing
-g++ -std=c++17 -Wall -g -static -o inomhus inomhus.o ANSI-Settings.o border.o coordinates.o cursor.o pawn.o field.o
+PREFIX=/usr/local
+g++ -std=c++17 -Wall -g -c -static inomhus.cpp -I$(PREFIX)/include -Wno-narrowing
+g++ -std=c++17 -Wall -g -static -o inomhus -L$(PREFIX)/lib inomhus.o -lpthread -lSista
 rm -f *.o
 ```
 
-If you compile the game from source you will be able to customize the game.
+The compilation information for Windows is in `compile.bat` but it could be outdated, and it requires the GCC keychain installed somehow.
+
+If you compile the game from source you will be able to customize the game (_before_ compilation).
 
 ```c
 #define DAY_DURATION 700
