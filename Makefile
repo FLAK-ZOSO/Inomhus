@@ -12,10 +12,14 @@ ifeq ($(OS),Windows_NT)
     WINMM_FLAG = -lwinmm
 	INCLUDE_PATH_DIRECTIVE = -I"$(PREFIX)\include"
 	LD_LIBRARY_PATH_DIRECTIVE = -L"$(PREFIX)\lib"
-else
+elifeq ($(UNAME),Linux)
 	PREFIX ?= /usr/local
 	INCLUDE_PATH_DIRECTIVE = -I$(PREFIX)/include
 	LD_LIBRARY_PATH_DIRECTIVE = -L$(PREFIX)/lib
+else
+	PREFIX ?= /usr/local
+	INCLUDE_PATH_DIRECTIVE = -I$(PREFIX)/include
+	LD_LIBRARY_PATH_DIRECTIVE = -Wl,-rpath,/usr/local/lib -L$(PREFIX)/lib
 endif
 
 all:

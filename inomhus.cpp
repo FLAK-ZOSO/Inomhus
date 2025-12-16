@@ -14,7 +14,7 @@
 #define WIDTH 70
 #define HEIGHT 30
 
-#define VERSION "1.0.0"
+#define VERSION "1.0.1"
 #define DATE "2025-12-16"
 
 #define REPOPULATE 0
