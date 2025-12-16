@@ -971,7 +971,7 @@ void populate(sista::SwappableField* field) {
     for (int i=0; i<3; i++) {
         coordinates = {rand() % HEIGHT, rand() % WIDTH};
         if (field->isFree(coordinates)) {
-            Chest::chests.push_back(std::make_shared<Chest>(coordinates, Inventory{(short)(rand() % 5), (short)(rand() % 5)}, true));
+            Chest::chests.push_back(std::make_shared<Chest>(coordinates, Inventory{(short)(rand() % 5), (short)(rand() % 5), 0}, true));
             field->addPrintPawn(Chest::chests.back());
         }
     }
