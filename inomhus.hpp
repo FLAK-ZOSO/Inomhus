@@ -273,7 +273,6 @@ void act(char);
 void printIntro();
 void tutorial();
 void printSideInstructions(int, int, int);
-void deallocateMemory();
 void populate(sista::SwappableField*);
 void repopulate(sista::SwappableField*);
 void spawnNew(sista::SwappableField*);

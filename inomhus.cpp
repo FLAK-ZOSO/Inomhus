@@ -423,8 +423,6 @@ int main(int argc, char** argv) {
         std::flush(std::cout);
     }
 
-    // Deallocate memory
-    deallocateMemory();
     th.join();
     field->clear();
     cursor.goTo(72, 0); // Move the cursor to the bottom of the screen, so the terminal is not left in a weird state
@@ -945,42 +943,6 @@ void printSideInstructions(int i, int dayCountdown, int nightCountdown) {
         cursor.goTo(29, WIDTH+10);
         std::cout << "Quit: \x1b[35mQ\x1b[37m\n";
     }
-}
-
-void deallocateMemory() {
-    // for (auto wall : Wall::walls) {
-    //     delete wall;
-    // }
-    // for (auto chest : Chest::chests) {
-    //     delete chest;
-    // }
-    // for (auto mine : Mine::mines) {
-    //     delete mine;
-    // }
-    // for (auto trap : Trap::traps) {
-    //     delete trap;
-    // }
-    // for (auto gate : Gate::gates) {
-    //     delete gate;
-    // }
-    // for (auto weasel : Weasel::weasels) {
-    //     delete weasel;
-    // }
-    // for (auto snake : Snake::snakes) {
-    //     delete snake;
-    // }
-    // for (auto chicken : Chicken::chickens) {
-    //     delete chicken;
-    // }
-    // for (auto egg : Egg::eggs) {
-    //     delete egg;
-    // }
-    // for (auto bullet : Bullet::bullets) {
-    //     delete bullet;
-    // }
-    // for (auto enemyBullet : EnemyBullet::enemyBullets) {
-    //     delete enemyBullet;
-    // }
 }
 
 void populate(sista::SwappableField* field) {
